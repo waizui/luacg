@@ -30,6 +30,6 @@ The execution results will be placed in the folder of this project.
 
 ## References
 
-[Appied Computer Graphics by Prof. Nobuyuki Umetani]()
+[Appied Computer Graphics by Prof. Nobuyuki Umetani](https://github.com/ACG-2024S/acg)
 
 [lua-pngencoder](https://github.com/wyozi/lua-pngencoder)
