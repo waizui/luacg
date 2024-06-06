@@ -13,7 +13,7 @@ more algorithms will be added in the future.
 
 ## Usage
 
-To use laucg, you need to install lua interpreter in your computer.
+To use luacg, you need to install lua interpreter in your computer.
 
 It can be downloaded [here](https://sourceforge.net/projects/luabinaries/files/5.2.4/Tools%20Executables/)
 
