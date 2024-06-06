@@ -7,7 +7,7 @@
 
 luacg is a project implements computer grahics algorithms in pure lua.
 
-you can lean computer graphics by reading the source code and making changes.
+you can learn computer graphics by reading the source code and making changes.
 
 more algorithms will be added in the future.
 
