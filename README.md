@@ -5,7 +5,7 @@
 
 ![preview](./preview.png)
 
-luacg is a project implements computer grahics algorithms in pure lua.
+luacg is a project implements computer graphics algorithms in pure lua.
 
 you can learn computer graphics by reading the source code and making changes.
 
