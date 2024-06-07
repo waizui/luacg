@@ -67,6 +67,10 @@ function M.mul(m1, m2)
   return m
 end
 
+function M.inverse(m)
+
+end
+
 function M.cross3d(u, v)
   local m = {
     u[2] * v[3] - u[3] * v[2],
@@ -94,7 +98,7 @@ function M.add(m1, m2)
   for i = 1, m1.r * m1.c do
     m[i] = m1[i] + m2[i]
   end
-  setmetatable(m,m1)
+  setmetatable(m, m1)
   return m
 end
 
@@ -113,6 +117,13 @@ M.T_matrixr4x4 = {
   mul = M.mul,
   print = M.print_matrix,
   scale = M.scale,
+  get = function(self, r, c)
+    -- index start from 1 , r,c from 0
+    return self[(r + 1) + c + 1]
+  end,
+  set = function(self, r, c, v)
+    self[(r + 1) + c + 1] = v
+  end
 }
 
 M.T_vector = {
