@@ -11,8 +11,7 @@ function M.test_inverse()
     0, 0, 0, 4)
 
   local im = data.inverse(m)
-  im:print_matrix()
-
+  im:print()
 end
 
 

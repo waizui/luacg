@@ -78,7 +78,7 @@ function M.inverse(m)
   end
 
   for c = 1, m.c do
-    for r = 1, m.r do
+    for r = c, m.r do
       M.eliminate(m, am, r, c)
     end
   end
@@ -89,7 +89,7 @@ function M.inverse(m)
 end
 
 function M.eliminate(m, am, sr, sc) --start row , stat col
-  for r = sr, m.r do
+  for r = sr + 1, m.r do
     local cur = m:get(r, sc)
     if not cur or cur == 0 then
       if r ~= sr then
@@ -184,10 +184,10 @@ M.T_matrixr4x4 = {
   scale = M.scale,
   get = function(self, r, c)
     -- index start from 1
-    return self[(r - 1) + c]
+    return self[(r - 1) * self.c + c]
   end,
   set = function(self, r, c, v)
-    self[(r - 1) + c] = v
+    self[(r - 1) * self.c + c] = v
   end,
   getrow = function(self, r)
     local row = {}
