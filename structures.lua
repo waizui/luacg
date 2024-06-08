@@ -68,7 +68,72 @@ function M.mul(m1, m2)
 end
 
 function M.inverse(m)
+  -- argument matrix
+  local am = {}
+  am.c = m.c
+  am.r = m.r
+  M.inherit(am, M.T_matrixr4x4)
+  for i = 1, m.c do
+    am:set(i, i, 1)
+  end
 
+  for c = 1, m.c do
+    for r = 1, m.r do
+      M.eliminate(m, am, r, c)
+    end
+  end
+
+  --TODO: bottom to top
+
+  return am
+end
+
+function M.eliminate(m, am, sr, sc) --start row , stat col
+  for r = sr, m.r do
+    local cur = m:get(r, sc)
+    if not cur or cur == 0 then
+      if r ~= sr then
+        M.swaprow(m, sr, r)
+        M.swaprow(am, sr, r)
+      end
+      break
+    end
+  end
+
+  local base = m:get(sr, sc)
+  if not base or base == 0 then
+    return
+  end
+
+  for r = sr + 1, m.r do
+    M.addrow(m, sr, r)
+    M.addrow(am, sr, r)
+  end
+
+  return m, am
+end
+
+function M.addrow(m, r1, r2)
+  local row1 = m:getrow(r1)
+  local row2 = m:getrow(r2)
+
+  local factor = -(row2[1] or 0) / row1[1]
+
+  for i = 1, m.c do
+    if row1[i] then
+      row2[i] = row1[i] * factor + (row2[i] or 0)
+    end
+  end
+
+  m:setrow(r2, row2)
+end
+
+function M.swaprow(m, r1, r2)
+  local tr1 = m:getrow(r1)
+  local tr2 = m:getrow(r2)
+
+  m:setrow(r1, tr2)
+  m:setrow(r2, tr1)
 end
 
 function M.cross3d(u, v)
@@ -118,12 +183,24 @@ M.T_matrixr4x4 = {
   print = M.print_matrix,
   scale = M.scale,
   get = function(self, r, c)
-    -- index start from 1 , r,c from 0
-    return self[(r + 1) + c + 1]
+    -- index start from 1
+    return self[(r - 1) + c]
   end,
   set = function(self, r, c, v)
-    self[(r + 1) + c + 1] = v
-  end
+    self[(r - 1) + c] = v
+  end,
+  getrow = function(self, r)
+    local row = {}
+    for i = 1, self.c do
+      row[i] = self:get(r, i)
+    end
+    return row
+  end,
+  setrow = function(self, r, ...)
+    for i, v in ipairs(...) do
+      self:set(r, i, v)
+    end
+  end,
 }
 
 M.T_vector = {
