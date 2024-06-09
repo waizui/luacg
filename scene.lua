@@ -8,13 +8,8 @@ local rasterize = function(w, h)
   local p2 = data.vec4(0, 1, -6, 1)
 
   local matvp = render.camera().matrixVP
-  local q0 = matvp:mul(p0)
-  local q1 = matvp:mul(p1)
-  local q2 = matvp:mul(p2)
-
-  local w0 = q0[3]
-  local w1 = q1[3]
-  local w2 = q2[3]
+  local q0, q1, q2 = matvp:mul(p0), matvp:mul(p1), matvp:mul(p2)
+  local w0, w1, w2 = q0[3], q1[3], q2[3]
 
   -- perspective division
   q0:scale(1 / w0)
