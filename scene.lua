@@ -49,12 +49,25 @@ local rasterize = function(w, h)
       end
 
       -- barycentric coordinates on screen space
-      local b = area0 + area1 + area2
-      local b0 = area0 / b
-      local b1 = area1 / b
-      local b2 = area2 / b
+      -- local area = area0 + area1 + area2
+      -- local b = {}
+      -- b[1] = area0 / area
+      -- b[2] = area1 / area
+      -- b[3] = area2 / area
 
-      buf[(h - i) * w + j] = { b0, b1, b2 }
+      -- to get barycentric coordinates on projection space (perspective correct)
+      -- ref: https://waizui.github.io/posts/barycentric/barycentric.html
+
+      local coeff = data.matrixr4x4(
+        q0[1] * w0, q1[1] * w1, q2[1] * w2, s[1],
+        q0[2] * w0, q1[2] * w1, q2[2] * w2, s[2],
+        q0[4], q1[4], q2[4], -1,
+        1, 1, 1, 0
+      )
+      local rhs = data.vec4(0, 0, 0, 1)
+      local b = data.inverse(coeff):mul(rhs)
+
+      buf[(h - i) * w + j] = { b[1], b[2], b[3] }
 
       ::continue::
     end
@@ -67,7 +80,7 @@ local rasterize = function(w, h)
     if not v then
       png:write { 0, 0, 0 }
     else
-      png:write { v[1] * 255, v[2] * 255, v[3] * 255 }
+      png:write { (v[1] * 255), (v[2] * 255), (v[3] * 255) }
     end
   end
 
