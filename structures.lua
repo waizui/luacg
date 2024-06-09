@@ -73,21 +73,28 @@ function M.inverse(m)
   am.c = m.c
   am.r = m.r
   M.inherit(am, M.T_matrixr4x4)
-  for i = 1, m.c do
-    am:set(i, i, 1)
+  for c = 1, m.c do
+    am:set(c, c, 1)
   end
 
   for c = 1, m.c do
     M.eliminate(m, am, c, c)
   end
 
-  --TODO: bottom to top
+  for c = m.c, 1, -1 do
+    M.reveliminate(m, am, c, c)
+  end
+
+  for r = 1, m.r do
+    local diag = m:get(r, r)
+    am:scalerow(r, 1 / diag)
+  end
 
   return am
 end
 
 function M.eliminate(m, am, sr, sc) --start row , stat col
-  -- make first element 1
+  -- make first element none zero
   local first = m:get(sr, sc)
   if not first or first == 0 then
     for r = sr + 1, m.r do
@@ -106,6 +113,29 @@ function M.eliminate(m, am, sr, sc) --start row , stat col
   end
 
   for r = sr + 1, m.r do
+    M.addrow(m, am, sr, r, sc)
+  end
+end
+
+function M.reveliminate(m, am, sr, sc) -- reverse-eliminate
+  local first = m:get(sr, sc)
+  if not first or first == 0 then
+    for r = sr - 1, 1, -1 do
+      local cur = m:get(r, sc)
+      if not cur or cur == 0 then
+        M.swaprow(m, r, sr)
+        M.swaprow(am, r, sr)
+        break
+      end
+    end
+  end
+
+  local base = m:get(sr, sc)
+  if not base or base == 0 then
+    return
+  end
+
+  for r = sr - 1, 1, -1 do
     M.addrow(m, am, sr, r, sc)
   end
 
@@ -162,9 +192,9 @@ function M.cross2d(u, v)
   return u[1] * v[2] - u[2] * v[1]
 end
 
-function M.scale(m, scala)
+function M.scale(m, factor)
   for i = 1, m.r * m.c do
-    m[i] = scala * m[i]
+    m[i] = factor * m[i]
   end
 
   return m
@@ -194,6 +224,14 @@ M.T_matrixr4x4 = {
   mul = M.mul,
   print = M.print_matrix,
   scale = M.scale,
+  scalerow = function(self, r, factor)
+    for i = 1, self.c do
+      local v = self:get(r, i)
+      if v and v ~= 0 then
+        self:set(r, i, v * factor)
+      end
+    end
+  end,
   get = function(self, r, c)
     -- index start from 1
     return self[(r - 1) * self.c + c]
