@@ -67,7 +67,22 @@ function M.mul(m1, m2)
   return m
 end
 
-function M.inverse(m)
+function M.matrixcopy(om)
+  local m = {}
+  m.r = om.r
+  m.c = om.c
+  M.inherit(m, M.T_matrixr4x4)
+  for r = 1, m.r do
+    for c = 1, m.c do
+      m:set(r, c, om:get(r, c))
+    end
+  end
+
+  return m
+end
+
+function M.inverse(om)
+  local m = M.matrixcopy(om)
   -- argument matrix
   local am = {}
   am.c = m.c
@@ -87,10 +102,21 @@ function M.inverse(m)
 
   for r = 1, m.r do
     local diag = m:get(r, r)
-    am:scalerow(r, 1 / diag)
+    M.scalerow(am, r, 1 / diag)
   end
 
   return am
+end
+
+function M.scalerow(m, r, factor)
+  for i = 1, m.c do
+    local v = m:get(r, i)
+    if v and v ~= 0 then
+      m:set(r, i, v * factor)
+    else
+      m:set(r, i, 0)
+    end
+  end
 end
 
 function M.eliminate(m, am, sr, sc) --start row , stat col
@@ -224,17 +250,9 @@ M.T_matrixr4x4 = {
   mul = M.mul,
   print = M.print_matrix,
   scale = M.scale,
-  scalerow = function(self, r, factor)
-    for i = 1, self.c do
-      local v = self:get(r, i)
-      if v and v ~= 0 then
-        self:set(r, i, v * factor)
-      end
-    end
-  end,
   get = function(self, r, c)
     -- index start from 1
-    return self[(r - 1) * self.c + c]
+    return self[(r - 1) * self.c + c] or 0
   end,
   set = function(self, r, c, v)
     self[(r - 1) * self.c + c] = v
