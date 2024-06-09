@@ -87,14 +87,16 @@ function M.inverse(m)
 end
 
 function M.eliminate(m, am, sr, sc) --start row , stat col
-  for r = sr + 1, m.r do
-    local cur = m:get(r, sc)
-    if not cur or cur == 0 then
-      if r ~= sr then
+  -- make first element 1
+  local first = m:get(sr, sc)
+  if not first or first == 0 then
+    for r = sr + 1, m.r do
+      local cur = m:get(r, sc)
+      if not cur or cur == 0 then
         M.swaprow(m, sr, r)
         M.swaprow(am, sr, r)
+        break
       end
-      break
     end
   end
 
@@ -104,26 +106,38 @@ function M.eliminate(m, am, sr, sc) --start row , stat col
   end
 
   for r = sr + 1, m.r do
-    M.addrow(m, sr, r, sc)
-    M.addrow(am, sr, r, sc)
+    M.addrow(m, am, sr, r, sc)
   end
 
   return m, am
 end
 
-function M.addrow(m, r1, r2, c)
-  local row1 = m:getrow(r1)
-  local row2 = m:getrow(r2)
+function M.addrow(m, am, r1, r2, c)
+  local row1, row2 = m:getrow(r1), m:getrow(r2)
 
-  local factor = -(row2[c] or 0) / row1[c]
+  local nume = row2[c] or 0
+
+  if nume == 0 then
+    return
+  end
+
+  local factor = -nume / row1[c]
+
+  local amrow1, amrow2 = am:getrow(r1), am:getrow(r2)
 
   for i = 1, m.c do
-    if row1[i] then
+    if row1[i] and row1[i] ~= 0 then
       row2[i] = row1[i] * factor + (row2[i] or 0)
+    end
+
+    if amrow1[i] and amrow1[i] ~= 0 then
+      local a, b = amrow2[i], amrow1[i]
+      amrow2[i] = amrow1[i] * factor + (amrow2[i] or 0)
     end
   end
 
   m:setrow(r2, row2)
+  am:setrow(r2, amrow2)
 end
 
 function M.swaprow(m, r1, r2)
