@@ -78,9 +78,7 @@ function M.inverse(m)
   end
 
   for c = 1, m.c do
-    for r = c, m.r do
-      M.eliminate(m, am, r, c)
-    end
+    M.eliminate(m, am, c, c)
   end
 
   --TODO: bottom to top
@@ -106,18 +104,18 @@ function M.eliminate(m, am, sr, sc) --start row , stat col
   end
 
   for r = sr + 1, m.r do
-    M.addrow(m, sr, r)
-    M.addrow(am, sr, r)
+    M.addrow(m, sr, r, sc)
+    M.addrow(am, sr, r, sc)
   end
 
   return m, am
 end
 
-function M.addrow(m, r1, r2)
+function M.addrow(m, r1, r2, c)
   local row1 = m:getrow(r1)
   local row2 = m:getrow(r2)
 
-  local factor = -(row2[1] or 0) / row1[1]
+  local factor = -(row2[c] or 0) / row1[c]
 
   for i = 1, m.c do
     if row1[i] then
