@@ -88,4 +88,19 @@ function M.naiverasterize(w, h, tri, buf, cb)
   end
 end
 
+---@return table
+function M.moasic(u, v)
+  local n = 8
+  local color = {}
+  local i, j = math.floor(u * n), math.floor(v * n)
+
+  if i % 1 == 0 or j % 1 == 0 then
+    color[1], color[2], color[3] = 0, 0, 0
+  else
+    color[1], color[2], color[3] = 1, 1, 1
+  end
+
+  return color
+end
+
 return M

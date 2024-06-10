@@ -2,7 +2,7 @@ local data = require("structures")
 local render = require("render")
 local encode = require("pngencoder")
 
-local writebuf = function(buf, w, h)
+local writebuf = function(buf, w, h, fname)
   -- write to png
   local png = encode(w, h)
   for i = 1, w * h do
@@ -16,7 +16,7 @@ local writebuf = function(buf, w, h)
 
   assert(png.done)
   local pngbin = table.concat(png.output)
-  local file = assert(io.open("./rasterize.png", "wb"))
+  local file = assert(io.open(fname, "wb"))
   file:write(pngbin)
   file:close()
 end
@@ -24,10 +24,14 @@ end
 local barycentric_coordinates = function(w, h)
   local p1 = data.vec4(-1, -1, -4, 1)
   local p2 = data.vec4(1, -1, -4, 1)
-  local p3 = data.vec4(0, 1, -6, 1)
-  local tri = data.triangle(p1, p2, p3)
+  local p3 = data.vec4(1, 1, -6, 1)
+  local p4 = data.vec4(-1, 1, -6, 1)
+
+  local tri1 = data.triangle(p1, p2, p3)
+  local tri2 = data.triangle(p1, p3, p4)
   local buf = {}
-  render.naiverasterize(w, h, tri, buf, function(s, q1, q2, q3)
+
+  local cb = function(s, q1, q2, q3)
     -- to get barycentric coordinates on projection space (perspective correct)
     -- ref: https://waizui.github.io/posts/barycentric/barycentric.html
     local w1, w2, w3 = q1[4], q2[4], q3[4]
@@ -40,12 +44,21 @@ local barycentric_coordinates = function(w, h)
     )
 
     local rhs = data.vec4(0, 0, 0, 1)
-    local b = data.inverse(coeff):mul(rhs)
+    local inv = data.inverse(coeff)
+    local im = inv:mul(coeff)
+    local b = inv:mul(rhs)
+
+    if math.abs(b[1]) > 1 or math.abs(b[2]) > 1 or math.abs(b[3]) > 1 then
+      return { 0xFF, 0xFF, 0xFF }
+    end
 
     return { b[1] * 255, b[2] * 255, b[3] * 255 }
-  end)
+  end
 
-  writebuf(buf, w, h)
+  render.naiverasterize(w, h, tri1, buf, cb)
+  render.naiverasterize(w, h, tri2, buf, cb)
+
+  writebuf(buf, w, h, "./rasterize.png")
 end
 
 barycentric_coordinates(64, 64)

@@ -108,8 +108,12 @@ end
 function M.scalerow(m, r, factor)
   for i = 1, m.c do
     local v = m:get(r, i)
-    if v and v ~= 0 then
-      m:set(r, i, v * factor)
+    if v then
+      if math.abs(v - 0) < 1e-10 then
+        m:set(r, i, 0)
+      else
+        m:set(r, i, v * factor)
+      end
     else
       m:set(r, i, 0)
     end
@@ -284,9 +288,9 @@ end
 
 function M.triangle(v1, v2, v3)
   return {
-    v1,
-    v2,
-    v3,
+    [1] = v1,
+    [2] = v2,
+    [3] = v3,
     vertex = function(self)
       return self[1], self[2], self[3]
     end,
