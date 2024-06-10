@@ -31,24 +31,12 @@ local barycentric_coordinates = function(w, h)
     -- to get barycentric coordinates on projection space (perspective correct)
     -- ref: https://waizui.github.io/posts/barycentric/barycentric.html
     local w1, w2, w3 = q1[4], q2[4], q3[4]
-
+    -- stylua: ignore
     local coeff = data.matrixr4x4(
-      q1[1] * w1,
-      q2[1] * w2,
-      q3[1] * w3,
-      s[1],
-      q1[2] * w1,
-      q2[2] * w2,
-      q3[2] * w3,
-      s[2],
-      q1[4],
-      q2[4],
-      q3[4],
-      -1,
-      1,
-      1,
-      1,
-      0
+      q1[1] * w1, q2[1] * w2, q3[1] * w3, s[1],
+      q1[2] * w1, q2[2] * w2, q3[2] * w3, s[2],
+      q1[4], q2[4], q3[4], -1,
+      1, 1, 1, 0
     )
 
     local rhs = data.vec4(0, 0, 0, 1)
