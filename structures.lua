@@ -282,4 +282,15 @@ function M.matrixr4x4(...)
   return m
 end
 
+function M.triangle(v1, v2, v3)
+  return {
+    v1,
+    v2,
+    v3,
+    vertex = function(self)
+      return self[1], self[2], self[3]
+    end,
+  }
+end
+
 return M
