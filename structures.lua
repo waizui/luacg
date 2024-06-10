@@ -49,8 +49,7 @@ end
 -- matrix multiplication
 function M.mul(m1, m2)
   local m = {}
-  m.r = m1.r
-  m.c = m2.c
+  m.r, m.c = m1.r, m2.c
   M.inherit(m, M.T_matrixr4x4)
   for i = 1, m1.r do
     for j = 1, m2.c do
@@ -69,8 +68,7 @@ end
 
 function M.matrixcopy(om)
   local m = {}
-  m.r = om.r
-  m.c = om.c
+  m.r, m.c = om.r, om.c
   M.inherit(m, M.T_matrixr4x4)
   for r = 1, m.r do
     for c = 1, m.c do
@@ -85,8 +83,7 @@ function M.inverse(om)
   local m = M.matrixcopy(om)
   -- argument matrix
   local am = {}
-  am.c = m.c
-  am.r = m.r
+  am.c, am.r = m.c, m.r
   M.inherit(am, M.T_matrixr4x4)
   for c = 1, m.c do
     am:set(c, c, 1)
@@ -197,8 +194,7 @@ function M.addrow(m, am, r1, r2, c)
 end
 
 function M.swaprow(m, r1, r2)
-  local tr1 = m:getrow(r1)
-  local tr2 = m:getrow(r2)
+  local tr1, tr2 = m:getrow(r1), m:getrow(r2)
 
   m:setrow(r1, tr2)
   m:setrow(r2, tr1)
