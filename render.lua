@@ -9,7 +9,7 @@ function M.camera(p, v, near, far, fov, aspect)
   v = v or data.vec3(0, 0, -1)
   near = near or 0.25
   far = far or 4
-  fov = fov or 0.8
+  fov = fov or 0.6
   aspect = aspect or 1
 
   local h = near * fov
@@ -36,18 +36,21 @@ function M.camera(p, v, near, far, fov, aspect)
   return camera
 end
 
-function M.naiverasterize(w, h, tri, buf, cb)
+---@param p primitive
+function M.naiverasterize(w, h, p, buf, cb)
   local matvp = M.camera().matrixVP
-  local p1, p2, p3 = tri:vertex()
+  local p1, p2, p3 = p[1], p[2], p[3]
+  local uv1, uv2, uv3 = p[4], p[5], p[6]
+
   local q1, q2, q3 = matvp:mul(p1), matvp:mul(p2), matvp:mul(p3)
   local w1, w2, w3 = q1[3], q2[3], q3[3]
 
   -- perspective division
-  q1:scale(1 / w1)
+  q1 = q1:scale(1 / w1)
   q1[4] = w1
-  q2:scale(1 / w2)
+  q2 = q2:scale(1 / w2)
   q2[4] = w2
-  q3:scale(1 / w3)
+  q3 = q3:scale(1 / w3)
   q3[4] = w3
 
   -- from top left corner to right bottom rasterize
@@ -55,11 +58,10 @@ function M.naiverasterize(w, h, tri, buf, cb)
     for j = 1, w do
       local ix = (2 * (j - 1) + 1) / w - 1
       local iy = (2 * (i - 1) + 1) / h - 1
-
+      -- screen coordinates
       local s  = data.vec2(ix, iy)
       -- used for substraction s become -s
-      s:scale(-1)
-
+      s = s:scale(-1)
 
       local r1 = data.vec2(q1[1], q1[2])
       local r2 = data.vec2(q2[1], q2[2])
@@ -80,24 +82,24 @@ function M.naiverasterize(w, h, tri, buf, cb)
       -- b[2] = area1 / area
       -- b[3] = area2 / area
 
-      local res = cb(s, q1, q2, q3)
-      buf[(h - i) * w + j] = res
+      local color = cb(s, data.primitive(q1, q2, q3, uv1, uv2, uv3))
+      buf[(h - i) * w + j] = color
 
       ::continue::
     end
   end
 end
 
+--- sample a moasic picture
 ---@return table
 function M.moasic(u, v)
   local n = 8
   local color = {}
-  local i, j = math.floor(u * n), math.floor(v * n)
-
-  if i % 1 == 0 or j % 1 == 0 then
+  local i, j = math.floor(u * n + 0.5), math.floor(v * n + 0.5)
+  if i % 2 == 0 or j % 2 == 0 then
     color[1], color[2], color[3] = 0, 0, 0
   else
-    color[1], color[2], color[3] = 1, 1, 1
+    color[1], color[2], color[3] = 0xFF, 0xFF, 0xFF
   end
 
   return color

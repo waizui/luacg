@@ -24,16 +24,19 @@ end
 local barycentric_coordinates = function(w, h)
   local p1 = data.vec4(-1, -1, -4, 1)
   local p2 = data.vec4(1, -1, -4, 1)
-  local p3 = data.vec4(1, 1, -6, 1)
-  local p4 = data.vec4(-1, 1, -6, 1)
+  local p3 = data.vec4(1, 1, -8, 1)
+  local p4 = data.vec4(-1, 1, -8, 1)
+  local uv1, uv2 = data.vec2(0, 0), data.vec2(1, 0)
+  local uv3, uv4 = data.vec2(1, 1), data.vec2(0, 1)
 
-  local tri1 = data.triangle(p1, p2, p3)
-  local tri2 = data.triangle(p1, p3, p4)
   local buf = {}
 
-  local cb = function(s, q1, q2, q3)
+  local cb = function(s, p)
     -- to get barycentric coordinates on projection space (perspective correct)
     -- ref: https://waizui.github.io/posts/barycentric/barycentric.html
+    local q1, q2, q3 = p[1], p[2], p[3]
+    local uv1, uv2, uv3 = p[4], p[5], p[6]
+
     local w1, w2, w3 = q1[4], q2[4], q3[4]
     -- stylua: ignore
     local coeff = data.matrixr4x4(
@@ -47,15 +50,20 @@ local barycentric_coordinates = function(w, h)
     local inv = data.inverse(coeff)
     local b = inv:mul(rhs)
 
-    return { b[1] * 255, b[2] * 255, b[3] * 255 }
+    local uv = data.add(uv1:scale(b[1]), uv2:scale(b[2]))
+    uv = data.add(uv, uv3:scale(b[3]))
+    uv.c = 1
+    uv.r = 2
+
+    return render.moasic(uv[1], uv[2])
   end
 
-  render.naiverasterize(w, h, tri1, buf, cb)
-  render.naiverasterize(w, h, tri2, buf, cb)
+  render.naiverasterize(w, h, data.primitive(p1, p2, p3, uv1, uv2, uv3), buf, cb)
+  render.naiverasterize(w, h, data.primitive(p1, p3, p4, uv1, uv3, uv4), buf, cb)
 
   writebuf(buf, w, h, "./rasterize.png")
 end
 
-barycentric_coordinates(64, 64)
+barycentric_coordinates(128, 128)
 
 print("terminated")
