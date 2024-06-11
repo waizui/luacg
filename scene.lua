@@ -52,8 +52,6 @@ local barycentric_coordinates = function(w, h)
 
     local uv = data.add(uv1:scale(b[1]), uv2:scale(b[2]))
     uv = data.add(uv, uv3:scale(b[3]))
-    uv.c = 1
-    uv.r = 2
 
     return render.moasic(uv[1], uv[2])
   end
