@@ -56,16 +56,16 @@ function M.naiverasterize(w, h, p, buf, cb)
   -- from top left corner to right bottom rasterize
   for i = h, 1, -1 do
     for j = 1, w do
-      local ix = (2 * (j - 1) + 1) / w - 1
-      local iy = (2 * (i - 1) + 1) / h - 1
+      local ix    = (2 * (j - 1) + 1) / w - 1
+      local iy    = (2 * (i - 1) + 1) / h - 1
       -- screen coordinates
-      local s  = data.vec2(ix, iy)
+      local s     = data.vec2(ix, iy)
       -- used for substraction s become -s
-      s = s:scale(-1)
+      s           = s:scale(-1)
 
-      local r1 = data.vec2(q1[1], q1[2])
-      local r2 = data.vec2(q2[1], q2[2])
-      local r3 = data.vec2(q3[1], q3[2])
+      local r1    = data.vec2(q1[1], q1[2])
+      local r2    = data.vec2(q2[1], q2[2])
+      local r3    = data.vec2(q3[1], q3[2])
 
       local area1 = data.cross2d(r2:add(s), r3:add(s))
       local area2 = data.cross2d(r3:add(s), r1:add(s))
@@ -95,9 +95,9 @@ end
 function M.moasic(u, v)
   local n = 8
   local color = {}
-  local i, j = math.floor(u * n + 0.5), math.floor(v * n + 0.5)
-  if i % 2 == 0 or j % 2 == 0 then
-    color[1], color[2], color[3] = 0, 0, 0
+  local d = math.floor(u * n) + math.floor(v * n)
+  if d % 2 == 0 then
+    color[1], color[2], color[3] = 0x40, 0x40, 0x40
   else
     color[1], color[2], color[3] = 0xFF, 0xFF, 0xFF
   end
