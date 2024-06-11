@@ -45,12 +45,7 @@ local barycentric_coordinates = function(w, h)
 
     local rhs = data.vec4(0, 0, 0, 1)
     local inv = data.inverse(coeff)
-    local im = inv:mul(coeff)
     local b = inv:mul(rhs)
-
-    if math.abs(b[1]) > 1 or math.abs(b[2]) > 1 or math.abs(b[3]) > 1 then
-      return { 0xFF, 0xFF, 0xFF }
-    end
 
     return { b[1] * 255, b[2] * 255, b[3] * 255 }
   end
