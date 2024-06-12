@@ -51,11 +51,11 @@ function M.naiverasterize(w, h, p, buf, cb)
   local w1, w2, w3 = q1[3], q2[3], q3[3]
 
   -- perspective division
-  q1 = q1:scale(1 / w1)
+  q1 = q1 / w1
   q1[4] = w1
-  q2 = q2:scale(1 / w2)
+  q2 = q2 / w2
   q2[4] = w2
-  q3 = q3:scale(1 / w3)
+  q3 = q3 / w3
   q3[4] = w3
 
   -- from top left corner to right bottom rasterize

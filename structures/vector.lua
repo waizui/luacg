@@ -18,7 +18,11 @@ function Vector.__mul(a, b)
   return op.scale(v, a, b)
 end
 
----@return Vector
+function Vector.__div(a,b)
+  local v = Vector.new(a.r)
+  return op.scale(v, a, 1/b)
+end
+
 function Vector.__add(a, b)
   local v = Vector.new(a.r)
   return op.add(v, a, b)

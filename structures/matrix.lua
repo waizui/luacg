@@ -1,14 +1,6 @@
 local lang = require("language")
 local op = require("structures.operation")
 
---[[
-M.T_matrixr4x4 = {
-	mul = M.mul,
-	print = M.print_matrix,
-	scale = M.scale,
-}
-]]
-
 ---@class Matrix
 local Matrix = lang.newclass("Matrix")
 
@@ -24,6 +16,11 @@ end
 function Matrix.__mul(a, b)
   local v = Matrix.new(a.r)
   return op.scale(v, a, b)
+end
+
+function Matrix.__div(a,b)
+  local v = Matrix.new(a.r)
+  return op.scale(v, a, 1/b)
 end
 
 ---@return Vector
