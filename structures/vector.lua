@@ -1,12 +1,7 @@
 local lang = require("language")
 local op = require("structures.operation")
 
--- local Vector = {
--- 	dot = M.mul,
--- 	scale = M.scale,
--- 	add = M.add,
--- }
-
+---@class Vector
 local Vector = lang.newclass("Vector")
 
 function Vector:ctor(r, ...)
@@ -23,13 +18,25 @@ function Vector.__mul(a, b)
 	return op.scale(v, a, b)
 end
 
+---@return Vector
 function Vector.__add(a, b)
 	local v = Vector.new(a.r)
 	return op.add(v, a, b)
 end
 
-function Vector:cross(v) end
+function Vector.__sub(a, b)
+	local v = Vector.new(a.r)
+	return op.sub(v, a, b)
+end
 
-function Vector:dot(v) end
+function Vector:cross(v)
+	local c = Vector.new(self.r)
+	return op.cross(c, self, v)
+end
+
+function Vector:dot(v)
+	local c = Vector.new(self.r)
+	return op.dot(c, self, v)
+end
 
 return Vector

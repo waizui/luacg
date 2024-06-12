@@ -39,7 +39,7 @@ local barycentric_coordinates = function(w, h)
 
 		local w1, w2, w3 = q1[4], q2[4], q3[4]
     -- stylua: ignore
-    local coeff = data.matrixr4x4(
+    local coeff = data.mat4x4(
       q1[1] * w1, q2[1] * w2, q3[1] * w3, s[1],
       q1[2] * w1, q2[2] * w2, q3[2] * w3, s[2],
       q1[4], q2[4], q3[4], -1,
@@ -47,7 +47,7 @@ local barycentric_coordinates = function(w, h)
     )
 
 		local rhs = data.vec4(0, 0, 0, 1)
-		local inv = data.inverse(coeff)
+		local inv = coeff:inverse()
 		local b = inv:mul(rhs)
 
 		local uv = uv1 * b[1] + uv2 * b[2] + uv3 * b[3]

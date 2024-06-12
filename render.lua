@@ -30,7 +30,12 @@ function M.camera(p, v, near, far, fov, aspect)
     far = far,
     fov = fov,
     aspect = aspect or 1,
-    matrixVP = data.matrixr4x4(m00, 0, m02, 0, 0, m11, m12, 0, 0, 0, m22, m23, 0, 0, m32, 0),
+    -- stylua: ignore
+    matrixVP = data.mat4x4(
+      m00, 0, m02, 0,
+      0, m11, m12, 0,
+      0, 0, m22, m23,
+      0, 0, m32, 0),
   }
 
   return camera
@@ -67,9 +72,9 @@ function M.naiverasterize(w, h, p, buf, cb)
       local r2 = data.vec2(q2[1], q2[2])
       local r3 = data.vec2(q3[1], q3[2])
 
-      local area1 = data.cross2d(r2 + s, r3 + s)
-      local area2 = data.cross2d(r3 + s, r1 + s)
-      local area3 = data.cross2d(r1 + s, r2 + s)
+      local area1 = (r2 + s):cross(r3 + s)
+      local area2 = (r3 + s):cross(r1 + s)
+      local area3 = (r1 + s):cross(r2 + s)
 
       if area1 < 0 or area2 < 0 or area3 < 0 then
         goto continue
