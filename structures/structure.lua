@@ -1,3 +1,5 @@
+local vector = require("structures.vector")
+
 local M = {}
 
 function M.inherit(m1, m2)
@@ -5,31 +7,12 @@ function M.inherit(m1, m2)
 end
 
 function M.vec2(x, y)
-  ---@class vec2
-  local m = {
-    [1] = x,
-    [2] = y,
-  }
-  m.r = 2
-  m.c = 1
-  m.cross = M.cross2d
-  m.scale = M.scale
-  M.inherit(m, M.T_vector)
-  return m
+  return vector.new(2, x, y)
 end
 
 function M.vec3(x, y, z)
-  ---@class vec3
-  local m = {
-    [1] = x,
-    [2] = y,
-    [3] = z,
-  }
-  m.r = 3
-  m.c = 1
+  return vector.new(3, x, y, z)
   m.cross = M.cross3d
-  M.inherit(m, M.T_vector)
-  return m
 end
 
 function M.vec4(x, y, z, w)
@@ -239,7 +222,7 @@ function M.add(m1, m2)
   for i = 1, m1.r * m1.c do
     m[i] = m1[i] + m2[i]
   end
-  M.inherit(m,m1)
+  M.inherit(m, m1)
   return m
 end
 
