@@ -29,7 +29,6 @@ local Object = {
 
 classes["Object"] = Object
 
-
 function Language.newclass(name, supername)
 	local class = {}
 	return Language.regclass(class, name, supername)
