@@ -1,6 +1,7 @@
+local encode = require("pngencoder")
 local data = require("structures.structure")
 local render = require("render.render")
-local encode = require("pngencoder")
+local bvh = require("render.bvh")
 
 local writebuf = function(buf, w, h, fname)
   -- write to png
@@ -62,6 +63,25 @@ local barycentric_coordinates = function(w, h)
   writebuf(buf, w, h, "./rasterize.png")
 end
 
-barycentric_coordinates(128, 128)
+-- barycentric_coordinates(128, 128)
+
+local raycast = function(w, h)
+  local p1 = data.vec4(-1, -1, -4, 1)
+  local p2 = data.vec4(1, -1, -4, 1)
+  local p3 = data.vec4(1, 1, -8, 1)
+  local p4 = data.vec4(-1, 1, -8, 1)
+  local uv1, uv2 = data.vec2(0, 0), data.vec2(1, 0)
+  local uv3, uv4 = data.vec2(1, 1), data.vec2(0, 1)
+
+  local buf = {}
+
+  local primitives = data.primitives(p1, p2, p3, uv1, uv2, uv3)
+  primitives:put(p1, p3, p4, uv1, uv3, uv4)
+  local b = bvh.new(primitives)
+  render.raycastrasetrize(w, h, b, buf, nil)
+  writebuf(buf, w, h, "./raycast.png")
+end
+
+raycast(128, 128)
 
 print("terminated")

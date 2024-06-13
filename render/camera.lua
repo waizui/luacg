@@ -48,7 +48,7 @@ function Camera:ray(wbuf, hbuf, i, j)
   local up = data.vec3(0, 1, 0)
   local right = self.dir:cross(up):normalize()
   local u, v = self.nearw / 2, self.nearh / 2
-  local lcorner = (self.pos + self.dir) - (u * right + v * up)
+  local lcorner = (self.pos + self.dir) - (right * u + up * v)
   local ray = (lcorner + ix * right + iy * up) - self.pos
   return ray
 end
