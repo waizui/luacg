@@ -54,6 +54,7 @@ function Language.regclass(class, name, supername)
     ins._clsname = name
     ins.__index = findfield
     setmetatable(ins, class)
+    -- class with constructor
     if ins.ctor then
       ins:ctor(...)
     end

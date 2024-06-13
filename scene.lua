@@ -1,5 +1,5 @@
 local data = require("structures.structure")
-local render = require("render")
+local render = require("render.render")
 local encode = require("pngencoder")
 
 local writebuf = function(buf, w, h, fname)
@@ -55,9 +55,10 @@ local barycentric_coordinates = function(w, h)
     return render.moasic(uv[1], uv[2])
   end
 
-  render.naiverasterize(w, h, data.primitive(p1, p2, p3, uv1, uv2, uv3), buf, cb)
-  render.naiverasterize(w, h, data.primitive(p1, p3, p4, uv1, uv3, uv4), buf, cb)
+  local primitives = data.primitives(p1, p2, p3, uv1, uv2, uv3)
+  primitives:put(p1, p3, p4, uv1, uv3, uv4)
 
+  render.naiverasterize(w, h, primitives, buf, cb)
   writebuf(buf, w, h, "./rasterize.png")
 end
 
