@@ -4,6 +4,7 @@ local Camera = require("render.camera")
 ---@class Render
 local Render = {}
 
+---@return Camera
 function Render.camera(p, v, near, far, fov, aspect)
   return Camera.new(p, v, near, far, fov, aspect)
 end
@@ -82,9 +83,26 @@ function Render.moasic(u, v)
   return color
 end
 
----@param p Primitives
-function Render.raycastring(w, h, p, buf, cb)
+---@param bvh BVH
+function Render.raycastrasetrize(w, h, bvh, buf, cb)
+  local cam = Render.camera()
 
+  -- from top left corner to right bottom rasterize
+  for i = h, 1, -1 do
+    for j = 1, w do
+      local src, ray = cam.pos, cam:ray(w, h, j, i)
+
+      local res = bvh:raycast(src, ray)
+
+      if not res then
+        goto continue
+      end
+
+
+      buf[(h - i) * w + j] = { 0xFF, 0xFF, 0xFF }
+      ::continue::
+    end
+  end
 end
 
 return Render

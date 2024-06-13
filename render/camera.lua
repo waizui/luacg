@@ -44,7 +44,7 @@ function Camera:ray(wbuf, hbuf, i, j)
   local ix = ((i - 1) + 0.5) / wbuf
   local iy = ((j - 1) + 0.5) / hbuf
 
-  -- define up if camera has rotated
+  -- define up according to camera rotation
   local up = data.vec3(0, 1, 0)
   local right = self.dir:cross(up):normalize()
   local u, v = self.nearw / 2, self.nearh / 2
