@@ -49,10 +49,14 @@ function Op.dot(m, a, b)
       for k = 1, b.r do
         local m1i = (i - 1) * a.c + k
         local m2i = (k - 1) * b.c + j
-        acc = acc + (a[m1i] * b[m2i])
+        acc = acc + (a[m1i] or 0) * (b[m2i] or 0)
       end
       m[(i - 1) * m.c + j] = acc
     end
+  end
+
+  if a.c == 1 then
+    return m[1]
   end
 
   return m

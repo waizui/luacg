@@ -52,7 +52,7 @@ function BVH.mollertrumbore(src, dir, v1, v2, v3)
   end
 
   -- determinant equals vol: dot(a,cross(b,c)) = det([a,b,c])
-  local invdet, s = 1 / vol, v1 - src
+  local invdet, s = 1 / vol, src - v1
   -- cramer's rule xi = det(Ai)/det(A)
   local u = invdet * s:dot(dirxe2)
   if u < 0 or u > 1 then
@@ -68,7 +68,8 @@ function BVH.mollertrumbore(src, dir, v1, v2, v3)
   local t = invdet * e2:dot(sxe1)
 
   if t > 1e-19 then
-    return src + dir * t
+    local hit =  src + dir * t
+    return hit
   end
 end
 

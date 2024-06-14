@@ -13,7 +13,14 @@ function Vector:ctor(r, ...)
   end
 end
 
+function Vector.isnumber(a)
+  return type(a) == "number"
+end
+
 function Vector.__mul(a, b)
+  if not Vector.isnumber(b) then
+    a, b = b, a
+  end
   local v = Vector.new(a.r)
   return op.scale(v, a, b)
 end
@@ -24,6 +31,9 @@ function Vector.__div(a, b)
 end
 
 function Vector.__add(a, b)
+  if not Vector.isnumber(b) then
+    a, b = b, a
+  end
   local v = Vector.new(a.r)
   return op.add(v, a, b)
 end

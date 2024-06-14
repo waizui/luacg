@@ -6,7 +6,7 @@ local Camera = require("language").newclass("Camera")
 function Camera:ctor(p, v, near, far, fov, aspect)
   -- TODO: world to viewspace transform
 
-  p = p or data.vec3(0, 0, 1)
+  p = p or data.vec3(0, 0, 0)
   v = v or data.vec3(0, 0, -1)
   near = near or 0.25
   far = far or 4
@@ -48,8 +48,8 @@ function Camera:ray(wbuf, hbuf, i, j)
   local up = data.vec3(0, 1, 0)
   local right = self.dir:cross(up):normalize()
   local u, v = self.nearw / 2, self.nearh / 2
-  local lcorner = (self.pos + self.dir) - (right * u + up * v)
-  local ray = (lcorner + ix * right + iy * up) - self.pos
+  local lcorner = (self.pos + self.dir * self.near) - (right * u + up * v)
+  local ray = (lcorner + ix * 2 * u * right + iy * 2 * v * up) - self.pos
   return ray
 end
 
