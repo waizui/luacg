@@ -61,14 +61,15 @@ function BVH.mollertrumbore(src, dir, v1, v2, v3)
 
   local sxe1 = s:cross(e1)
   local v = invdet * dir:dot(sxe1)
-  if v < 0 or v > 1 then
+  -- careful check u + v > 1 they can be both less than 1
+  if v < 0 or u + v > 1 then
     return
   end
 
   local t = invdet * e2:dot(sxe1)
 
   if t > 1e-19 then
-    local hit =  src + dir * t
+    local hit = src + dir * t
     return hit
   end
 end

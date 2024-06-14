@@ -76,7 +76,7 @@ local raycast = function(w, h)
   local buf = {}
 
   local primitives = data.primitives(p1, p2, p3, uv1, uv2, uv3)
-  -- primitives:put(p1, p3, p4, uv1, uv3, uv4)
+  primitives:put(p1, p3, p4, uv1, uv3, uv4)
   local b = bvh.new(primitives)
   render.raycastrasetrize(w, h, b, buf, nil)
   writebuf(buf, w, h, "./raycast.png")
