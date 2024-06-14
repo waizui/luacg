@@ -27,8 +27,8 @@ end
 
 ---@param ... 123:vertex, 456:uv
 ---@return Primitives
-function M.primitives(...)
-  return primitives.new(2, 3, ...)
+function M.primitives(r,c,...)
+  return primitives.new(r, c, ...)
 end
 
 return M

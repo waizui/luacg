@@ -92,9 +92,9 @@ function Render.raycastrasetrize(w, h, bvh, buf, cb)
     for j = 1, w do
       local src, ray = cam.pos, cam:ray(w, h, j, i)
 
-      local res = bvh:naiveraycast(src, ray)
+      local hit = bvh:naiveraycast(src, ray)
 
-      if not res then
+      if not hit then
         goto continue
       end
 

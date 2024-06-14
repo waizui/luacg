@@ -18,9 +18,9 @@ function Matrix.__mul(a, b)
   return op.scale(v, a, b)
 end
 
-function Matrix.__div(a,b)
+function Matrix.__div(a, b)
   local v = Matrix.new(a.r)
-  return op.scale(v, a, 1/b)
+  return op.scale(v, a, 1 / b)
 end
 
 ---@return Vector
@@ -201,6 +201,23 @@ function Matrix.swaprow(m, r1, r2)
 
   m:setrow(r1, tr2)
   m:setrow(r2, tr1)
+end
+
+function Matrix.identity(d)
+  local m = Matrix.new(d, d)
+  for i = 1, d do
+    m[(i - 1) * d + i] = 1
+  end
+
+  return m
+end
+
+function Matrix.translate(d, ...)
+  local m = Matrix.identity(d)
+  for i, v in ipairs({ ... }) do
+    m[i * d] = v
+  end
+  return m
 end
 
 return Matrix

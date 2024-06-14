@@ -1,9 +1,18 @@
 ---@class BVH
 local BVH = require("language").newclass("BVH")
 
+---@class BVNode
+local BVNode = require("language").newclass("BVNode")
+
+function BVNode:ctor() end
+
 ---@param p Primitives
 function BVH:ctor(p)
   self.primitives = p
+end
+
+function BVH:build()
+  local p = self.primitives
 end
 
 function BVH.raycast(bvh, src, dir)
@@ -74,4 +83,4 @@ function BVH.mollertrumbore(src, dir, v1, v2, v3)
   end
 end
 
-return BVH
+return BVH, BVNode

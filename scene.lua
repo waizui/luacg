@@ -2,6 +2,8 @@ local encode = require("pngencoder")
 local data = require("structures.structure")
 local render = require("render.render")
 local bvh = require("render.bvh")
+local mesh = require("render.meshgenerator")
+local vector = require("structures.vector")
 
 local writebuf = function(buf, w, h, fname)
   -- write to png
@@ -56,7 +58,7 @@ local barycentric_coordinates = function(w, h)
     return render.moasic(uv[1], uv[2])
   end
 
-  local primitives = data.primitives(p1, p2, p3, uv1, uv2, uv3)
+  local primitives = data.primitives(2, 3, p1, p2, p3, uv1, uv2, uv3)
   primitives:put(p1, p3, p4, uv1, uv3, uv4)
 
   render.naiverasterize(w, h, primitives, buf, cb)
@@ -66,17 +68,10 @@ end
 -- barycentric_coordinates(128, 128)
 
 local raycast = function(w, h)
-  local p1 = data.vec3(-1, -1, -4)
-  local p2 = data.vec3(1, -1, -4)
-  local p3 = data.vec3(1, 1, -4)
-  local p4 = data.vec3(-1, 1, -4)
-  local uv1, uv2 = data.vec2(0, 0), data.vec2(1, 0)
-  local uv3, uv4 = data.vec2(1, 1), data.vec2(0, 1)
-
   local buf = {}
-
-  local primitives = data.primitives(p1, p2, p3, uv1, uv2, uv3)
-  primitives:put(p1, p3, p4, uv1, uv3, uv4)
+  local box = mesh.box(vector.new(3, 1, 1, -2))
+  -- lua > 5.1 unpack not avialibe
+  local primitives = data.primitives(1, 3, unpack(box))
   local b = bvh.new(primitives)
   render.raycastrasetrize(w, h, b, buf, nil)
   writebuf(buf, w, h, "./raycast.png")
