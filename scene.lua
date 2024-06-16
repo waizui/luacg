@@ -69,7 +69,7 @@ end
 
 local raycast = function(w, h)
   local buf = {}
-  local box = mesh.box(vector.new(3, 1, 1, -2))
+  local box = mesh.box(vector.new(3, -2,-2, -12))
   -- lua > 5.1 unpack not avialibe
   local primitives = data.primitives(1, 3, unpack(box))
   local b = bvh.new(primitives)
