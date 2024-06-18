@@ -22,10 +22,13 @@ end
 
 function Primitives.put(p, ...)
   local arg = { ... }
-  for i = 1, #arg do
+  local c, len = #arg, p.r * p.c
+  for i = 1, c do
     table.insert(p.data, arg[i])
+    if i % len == 0 then
+      p.count = p.count + 1
+    end
   end
-  p.count = p.count + 1
 end
 
 return Primitives

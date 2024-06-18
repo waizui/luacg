@@ -85,7 +85,8 @@ end
 
 ---@param bvh BVH
 function Render.raycastrasetrize(w, h, bvh, buf, cb)
-  local cam = Render.camera()
+  -- fov 0.9
+  local cam = Render.camera(nil,nil,nil,nil,0.9,nil)
 
   -- from top left corner to right bottom rasterize
   for i = h, 1, -1 do
@@ -98,8 +99,8 @@ function Render.raycastrasetrize(w, h, bvh, buf, cb)
         goto continue
       end
 
-
-      buf[(h - i) * w + j] = { 0xFF, 0xFF, 0xFF }
+      local color = cb(hit)
+      buf[(h - i) * w + j] = color
       ::continue::
     end
   end

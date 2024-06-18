@@ -30,9 +30,14 @@ The execution results will be placed in the folder of this project.
 
 ## List
 
-### 1. Rasterisation and  barycentric coordinates
+### 1. rasterisation and  barycentric coordinates
 
-![1](./rasterize_preview.png)
+![1](./pic/rasterize_preview.png)
+
+
+### 2. naive path tracing
+
+![2](./pic/raycast_preview.png)
 
 ## References
 

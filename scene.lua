@@ -65,19 +65,43 @@ local barycentric_coordinates = function(w, h)
   writebuf(buf, w, h, "./rasterize.png")
 end
 
--- barycentric_coordinates(128, 128)
-
 local raycast = function(w, h)
+  local cb = function(hit)
+    local z = hit[3]
+    local d = (z + 15) / 20 * 255
+    return { d, d, d }
+  end
+
   local buf = {}
-  -- local box = mesh.box(vector.new(3, -2,-2, -12))
-  local box = mesh.sphere(vector.new(3, 0, 0, -10),2)
-  -- lua > 5.1 unpack not avialibe
-  local primitives = data.primitives(1, 3, unpack(box))
+  local box = mesh.box(vector.new(3, -1.5, -1.5, -6))
+  local sphere = mesh.sphere(vector.new(3, 1.5, 1.5, -6), 1)
+  local primitives = data.primitives(1, 3, unpack(sphere))
+  primitives:put(unpack(box))
   local b = bvh.new(primitives)
-  render.raycastrasetrize(w, h, b, buf, nil)
+  render.raycastrasetrize(w, h, b, buf, cb)
   writebuf(buf, w, h, "./raycast.png")
 end
 
-raycast(128, 128)
+local repl = function()
+  local str = {
+    "please select what to render",
+    " [1]: rasterisation and  barycentric coordinates",
+    " [2]: naive path tracing",
+  }
+  print(table.concat(str, ""))
 
-print("terminated")
+  local i = io.read("*n")
+  print("processing...")
+  local size = 128
+  if i == 1 then
+    barycentric_coordinates(size, size)
+  elseif i == 2 then
+    raycast(size, size)
+  else
+    print("no such selection")
+  end
+end
+
+repl()
+
+print("finished")
