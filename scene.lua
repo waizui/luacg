@@ -75,8 +75,8 @@ local raycast = function(w, h)
   local buf = {}
   local box = mesh.box(vector.new(3, -1.5, -1.5, -6))
   local sphere = mesh.sphere(vector.new(3, 1.5, 1.5, -6), 1)
-  local primitives = data.primitives(1, 3, unpack(sphere))
-  primitives:put(unpack(box))
+  local primitives = data.primitives(1, 3, table.unpack(sphere))
+  primitives:put(table.unpack(box))
   local b = bvh.new(primitives)
   render.raycastrasetrize(w, h, b, buf, cb)
   writebuf(buf, w, h, "./raycast.png")
@@ -88,7 +88,7 @@ local repl = function()
     " [1]: rasterisation and  barycentric coordinates",
     " [2]: naive path tracing",
   }
-  print(table.concat(str, ""))
+  print(table.concat(str, "\n"))
 
   local i = io.read("*n")
   print("processing...")

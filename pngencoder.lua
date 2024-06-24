@@ -1,12 +1,15 @@
 local Png = {}
 Png.__index = Png
 
+
+
 local DEFLATE_MAX_BLOCK_SIZE = 65535
 
 print("using ".._VERSION)
-if _VERSION == "Lua 5.2" then
-  bit = bit32
+if not bit  then
+  bit = require("bitwise")
 end
+
 
 local function putBigUint32(val, tbl, index)
     for i=0,3 do
@@ -108,14 +111,15 @@ end
 function Png:crc32(data, index, len)
     self.crc = bit.bnot(self.crc)
     for i=index,index+len-1 do
-        local byte = data[i]
-        for j=0,7 do  -- Inefficient bitwise implementation, instead of table-based
-            local nbit = bit.band(bit.bxor(self.crc, bit.rshift(byte, j)), 1);
-            self.crc = bit.bxor(bit.rshift(self.crc, 1), bit.band((-nbit), 0xEDB88320));
-        end
+         local byte = data[i]
+         for j=0,7 do  -- Inefficient bitwise implementation, instead of table-based
+             local nbit = bit.band(bit.bxor(self.crc, bit.rshift(byte, j)), 1);
+             self.crc = bit.bxor(bit.rshift(self.crc, 1), bit.band((-nbit), 0xEDB88320));
+         end
     end
     self.crc = bit.bnot(self.crc)
 end
+
 function Png:adler32(data, index, len)
     local s1 = bit.band(self.adler, 0xFFFF)
     local s2 = bit.rshift(self.adler, 16)
