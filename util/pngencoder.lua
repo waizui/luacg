@@ -6,8 +6,10 @@ Png.__index = Png
 local DEFLATE_MAX_BLOCK_SIZE = 65535
 
 print("using ".._VERSION)
-if not bit  then
-  bit = require("bitwise")
+if bit32 then
+  bit = bit32
+elseif not bit then
+  bit = require("util.bitwise")
 end
 
 

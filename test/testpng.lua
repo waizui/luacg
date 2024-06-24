@@ -1,4 +1,4 @@
-local encode = require("pngencoder")
+local encode = require("util.pngencoder")
 
 local test_png = function(w, h)
 	local buf = {}

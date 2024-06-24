@@ -1,4 +1,4 @@
-local encode = require("pngencoder")
+local encode = require("util.pngencoder")
 local data = require("structures.structure")
 local render = require("render.render")
 local bvh = require("render.bvh")
@@ -13,7 +13,7 @@ local writebuf = function(buf, w, h, fname)
     if not v then
       png:write({ 0, 0, 0 })
     else
-      png:write({ v[1], v[2], v[3] })
+      png:write({math.floor( v[1]+0.5), math.floor(v[2]+0.5), math.floor(v[3]+0.5) })
     end
   end
 
