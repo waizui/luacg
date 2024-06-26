@@ -1,19 +1,50 @@
+local lang   = require("language")
+local vector = require("structures.vector")
+
 ---@class BVH
-local BVH = require("language").newclass("BVH")
+local BVH    = lang.newclass("BVH")
 
 ---@class BVNode
-local BVNode = require("language").newclass("BVNode")
+local BVNode = lang.newclass("BVNode")
 
-function BVNode:ctor() end
+function BVNode:ctor()
+end
+
+---@class Bounds
+local Bounds = lang.newclass("Bounds")
+
+function Bounds:ctor()
+  local v = math.huge
+  self.max = vector.new(-v,-v,-v)
+  self.min = vector.new(v,v,v)
+end
+
+function Bounds.union(a, b)
+  local bounds = Bounds.new()
+
+  bounds.max = vector.new(
+    math.max(a.max[1], b.max[1]),
+    math.max(a.max[2], b.max[2]),
+    math.max(a.max[3], b.max[3])
+  )
+
+  bounds.min = vector.new(
+    math.min(a.min[1], b.min[1]),
+    math.min(a.min[2], b.min[2]),
+    math.min(a.min[3], b.min[3])
+  )
+end
 
 ---@param p Primitives
 function BVH:ctor(p)
   self.primitives = p
+  self.nodecount = 0
 end
 
 function BVH:build()
   local p = self.primitives
 end
+
 
 function BVH.raycast(bvh, src, dir)
   --
@@ -83,4 +114,4 @@ function BVH.mollertrumbore(src, dir, v1, v2, v3)
   end
 end
 
-return BVH, BVNode
+return BVH, BVNode, Bounds
