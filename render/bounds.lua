@@ -1,5 +1,6 @@
 local lang = require("language")
 local vector = require("structures.vector")
+
 ---@class Bounds
 local Bounds = lang.newclass("Bounds")
 
@@ -17,9 +18,18 @@ function Bounds.union(a, b)
 	bounds.min = vector.new(math.min(a.min[1], b.min[1]), math.min(a.min[2], b.min[2]), math.min(a.min[3], b.min[3]))
 end
 
+---@param p Vector
+function Bounds:encapsulate(p)
+  local b = Bounds.new()
+  b.min =  vector.min(self.min,p)
+  b.max = vector.max(self.max,p)
+  return b
+end
+
 --return the offset of p from pmin to pmax in [0,1]
 ---@param b Bounds
 ---@param p Vector
+---@return Vector
 function Bounds.offset(b, p)
 	local pMax, pMin = b.max, b.min
 	local o = p - pMin
@@ -38,3 +48,5 @@ function Bounds.offset(b, p)
 
 	return o
 end
+
+return Bounds

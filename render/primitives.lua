@@ -1,3 +1,6 @@
+local vector = require("structures.vector")
+local bounds = require("render.bounds")
+
 ---@class Primitives
 local Primitives = require("language").newclass("Primitives")
 
@@ -29,6 +32,22 @@ function Primitives.put(p, ...)
       p.count = p.count + 1
     end
   end
+end
+
+---@return Bounds
+function Primitives:bounds(i)
+  local p, b = self:get(i), bounds.new()
+  for i = 1, self.c do
+    b:encapsulate(p[i])
+  end
+
+  return b
+end
+
+---@param p Primitives
+function Primitives.centroid(p, i)
+  local b = p:bounds(i)
+  return (b.min + b.max) * 0.5
 end
 
 return Primitives

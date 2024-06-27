@@ -17,6 +17,7 @@ function Vector.isnumber(a)
   return type(a) == "number"
 end
 
+---@return  Vector
 function Vector.__mul(a, b)
   if not Vector.isnumber(b) then
     a, b = b, a
@@ -60,6 +61,41 @@ function Vector.normalize(a)
     acc = acc + a[i] * a[i]
   end
   return a / math.sqrt(acc)
+end
+
+function Vector.max(a, b)
+  for i = 1, a.r do
+    if a[i] > b[i] then
+      return a
+    end
+  end
+
+  return b
+end
+
+function Vector.min(a, b)
+  local r = Vector.max(a, b)
+  if r ~= a then
+    return b
+  end
+  return a
+end
+
+---@param iter function
+function Vector.foreach(v, iter)
+  for i = 1, v.r do
+    local cur = v[i]
+    v[i] = iter(cur, i) or cur
+  end
+end
+
+---@param v Vector
+function Vector.toint(v)
+  v:foreach(function(vi, i)
+    return math.floor(vi + 0.5)
+  end)
+
+  return v
 end
 
 return Vector

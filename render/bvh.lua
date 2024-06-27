@@ -1,4 +1,5 @@
 local lang = require("language")
+local vector = require("structures.vector")
 
 ---@class BVH
 local BVH = lang.newclass("BVH")
@@ -22,8 +23,10 @@ function BVH:buildmortonarray(bounds)
   local ma, scale = {}, 1 << 10 -- use 10 bits representing morton number
 
   for i = 1, prims.count do
-    local p = prims:get(i)
-    local offset = bounds:offset()
+    local p = prims:centroid(i)
+    local poffset = bounds:offset(p)
+    local offset = vector.toint(scale * poffset)
+    ma[i] = BVH.mortoncode(offset)
   end
 
   return ma
@@ -43,7 +46,7 @@ end
 
 ---@param v Vector
 function BVH.mortoncode(v)
-  return BVH.shiftleft3(v << 2) | BVH.shiftleft3(v << 1) | BVH.shiftleft3(v)
+  return BVH.shiftleft3(v[1] << 2) | BVH.shiftleft3(v[2] << 1) | BVH.shiftleft3(v[3])
 end
 
 function BVH.raycast(bvh, src, dir)
