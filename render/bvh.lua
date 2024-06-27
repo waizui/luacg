@@ -1,39 +1,12 @@
-local lang   = require("language")
-local vector = require("structures.vector")
+local lang = require("language")
 
 ---@class BVH
-local BVH    = lang.newclass("BVH")
+local BVH = lang.newclass("BVH")
 
 ---@class BVNode
 local BVNode = lang.newclass("BVNode")
 
-function BVNode:ctor()
-end
-
----@class Bounds
-local Bounds = lang.newclass("Bounds")
-
-function Bounds:ctor()
-  local v = math.huge
-  self.max = vector.new(-v,-v,-v)
-  self.min = vector.new(v,v,v)
-end
-
-function Bounds.union(a, b)
-  local bounds = Bounds.new()
-
-  bounds.max = vector.new(
-    math.max(a.max[1], b.max[1]),
-    math.max(a.max[2], b.max[2]),
-    math.max(a.max[3], b.max[3])
-  )
-
-  bounds.min = vector.new(
-    math.min(a.min[1], b.min[1]),
-    math.min(a.min[2], b.min[2]),
-    math.min(a.min[3], b.min[3])
-  )
-end
+function BVNode:ctor() end
 
 ---@param p Primitives
 function BVH:ctor(p)
@@ -41,10 +14,37 @@ function BVH:ctor(p)
   self.nodecount = 0
 end
 
-function BVH:build()
-  local p = self.primitives
+function BVH:build() end
+
+---@param bounds Bounds
+function BVH:buildmortonarray(bounds)
+  local prims = self.primitives
+  local ma, scale = {}, 1 << 10 -- use 10 bits representing morton number
+
+  for i = 1, prims.count do
+    local p = prims:get(i)
+    local offset = bounds:offset()
+  end
+
+  return ma
 end
 
+function BVH.shiftleft3(x)
+  if x == x << 10 then
+    x = x - 1
+  end
+
+  x = (x | (x << 16)) & 0x030000FF -- 0b00000011000000000000000011111111
+  x = (x | (x << 8)) & 0x0300F00F -- 0b00000011000000001111000000001111
+  x = (x | (x << 4)) & 0x030C30C3 -- 0b00000011000011000011000011000011
+  x = (x | (x << 2)) & 0x09249249 -- 0b00001001001001001001001001001001
+  return x & 0xFFFFFFFF
+end
+
+---@param v Vector
+function BVH.mortoncode(v)
+  return BVH.shiftleft3(v << 2) | BVH.shiftleft3(v << 1) | BVH.shiftleft3(v)
+end
 
 function BVH.raycast(bvh, src, dir)
   --
@@ -114,4 +114,4 @@ function BVH.mollertrumbore(src, dir, v1, v2, v3)
   end
 end
 
-return BVH, BVNode, Bounds
+return BVH, BVNode
