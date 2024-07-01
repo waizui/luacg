@@ -1,28 +1,9 @@
-local encode = require("util.pngencoder")
+local writebuf = require("util.pngencoder")
 local data = require("structures.structure")
 local render = require("render.render")
 local bvh = require("render.bvh")
 local mesh = require("render.meshgenerator")
 local vector = require("structures.vector")
-
-local writebuf = function(buf, w, h, fname)
-  -- write to png
-  local png = encode(w, h)
-  for i = 1, w * h do
-    local v = buf[i]
-    if not v then
-      png:write({ 0, 0, 0 })
-    else
-      png:write({math.floor( v[1]+0.5), math.floor(v[2]+0.5), math.floor(v[3]+0.5) })
-    end
-  end
-
-  assert(png.done)
-  local pngbin = table.concat(png.output)
-  local file = assert(io.open(fname, "wb"))
-  file:write(pngbin)
-  file:close()
-end
 
 local barycentric_coordinates = function(w, h)
   local p1 = data.vec4(-1, -1, -4, 1)
@@ -58,10 +39,10 @@ local barycentric_coordinates = function(w, h)
     return render.moasic(uv[1], uv[2])
   end
 
-  local primitives = data.primitives(2, 3, p1, p2, p3, uv1, uv2, uv3)
-  primitives:put(p1, p3, p4, uv1, uv3, uv4)
+  local primitive = data.primitive(2, 3, p1, p2, p3, uv1, uv2, uv3)
+  primitive:put(p1, p3, p4, uv1, uv3, uv4)
 
-  render.naiverasterize(w, h, primitives, buf, cb)
+  render.naiverasterize(w, h, primitive, buf, cb)
   writebuf(buf, w, h, "./rasterize.png")
 end
 
@@ -75,9 +56,9 @@ local raycast = function(w, h)
   local buf = {}
   local box = mesh.box(vector.new(3, -1.5, -1.5, -6))
   local sphere = mesh.sphere(vector.new(3, 1.5, 1.5, -6), 1)
-  local primitives = data.primitives(1, 3, table.unpack(sphere))
-  primitives:put(table.unpack(box))
-  local b = bvh.new(primitives)
+  local primitive = data.primitive(1, 3, table.unpack(sphere))
+  primitive:put(table.unpack(box))
+  local b = bvh.new(primitive)
   render.raycastrasetrize(w, h, b, buf, cb)
   writebuf(buf, w, h, "./raycast.png")
 end

@@ -1,5 +1,6 @@
 local lang = require("language")
 local vector = require("structures.vector")
+local bounds = require("render.bounds")
 
 ---@class BVH
 local BVH = lang.newclass("BVH")
@@ -9,27 +10,53 @@ local BVNode = lang.newclass("BVNode")
 
 function BVNode:ctor() end
 
----@param p Primitives
+---@param p Primitive
 function BVH:ctor(p)
-  self.primitives = p
-  self.nodecount = 0
+  self.primitives = {}
+  table.insert(self.primitives, p)
 end
 
-function BVH:build() end
+---@param p Primitive
+function BVH:add(p)
+  table.insert(self.primitives, p)
+  return self
+end
 
----@param bounds Bounds
-function BVH:buildmortonarray(bounds)
-  local prims = self.primitives
-  local ma, scale = {}, 1 << 10 -- use 10 bits representing morton number
+function BVH:build()
+  local b = self:boundingbox()
+  local mortons = self:buildmortonarray(b)
+  table.sort(mortons)
+end
 
-  for i = 1, prims.count do
-    local p = prims:centroid(i)
-    local poffset = bounds:offset(p)
-    local offset = vector.toint(scale * poffset)
-    ma[i] = BVH.mortoncode(offset)
+--- bounding box of all primitive's centroid 
+function BVH:boundingbox()
+  ---@type Bounds
+  local b = bounds.new()
+  for i = 1, #self.primitives do
+    ---@type Primitive
+    local prims = self.primitives[i]
+    b = b:encapsulate(prims:centroid())
   end
 
-  return ma
+  return b
+end
+
+---@param b Bounds
+function BVH:buildmortonarray(b)
+  local mortonarr, scale = {}, 1 << 10 -- use 10 bits representing morton number
+
+  for i = 1, #self.primitives do
+    ---@type Primitive
+    local prims = self.primitives[i]
+    for j = 1, prims.count do
+      local p = prims:centroid()
+      local poffset = b:offset(p)
+      local offset = vector.toint(scale * poffset)
+      mortonarr[j] = BVH.mortoncode(offset)
+    end
+  end
+
+  return mortonarr
 end
 
 function BVH.shiftleft3(x)
@@ -53,20 +80,22 @@ function BVH.raycast(bvh, src, dir)
   --
 end
 
----@param bvn BVH
-function BVH.naiveraycast(bvn, src, dir)
-  local p = bvn.primitives
+---@param bvh BVH
+function BVH.naiveraycast(bvh, src, dir)
   local depth = math.huge
   local hit = nil
-  for i = 1, p.count do
-    local obj = p:get(i)
-    local v1, v2, v3 = obj[1], obj[2], obj[3]
-    local res = BVH.mollertrumbore(src, dir, v1, v2, v3)
-    if res then
-      local d = (res - src):dot(dir)
-      if d < depth then
-        depth = d
-        hit = res
+  for i = 1, #bvh.primitives do
+    local p = bvh.primitives[i]
+    for j = 1, p.count do
+      local obj = p:get(j)
+      local v1, v2, v3 = obj[1], obj[2], obj[3]
+      local res = BVH.mollertrumbore(src, dir, v1, v2, v3)
+      if res then
+        local d = (res - src):dot(dir)
+        if d < depth then
+          depth = d
+          hit = res
+        end
       end
     end
   end

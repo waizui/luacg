@@ -44,6 +44,16 @@ function Vector.__sub(a, b)
   return op.sub(v, a, b)
 end
 
+function Vector.__eq(a, b)
+  for i = 1, a.r do
+    if a[i] ~= b[i] then
+      return false
+    end
+  end
+
+  return true
+end
+
 function Vector.cross(a, b)
   local v = Vector.new(a.r)
   return op.cross(v, a, b)
@@ -76,9 +86,9 @@ end
 function Vector.min(a, b)
   local r = Vector.max(a, b)
   if r ~= a then
-    return b
+    return a
   end
-  return a
+  return b
 end
 
 ---@param iter function

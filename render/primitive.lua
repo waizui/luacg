@@ -1,11 +1,11 @@
 local vector = require("structures.vector")
 local bounds = require("render.bounds")
 
----@class Primitives
-local Primitives = require("language").newclass("Primitives")
+---@class Primitive
+local Primitive = require("language").newclass("Primitive")
 
 ---@param r number row of data table eg. r=2,c=2 meaning 2x2 dataset
-function Primitives:ctor(r, c, ...)
+function Primitive:ctor(r, c, ...)
   self.r = r
   self.c = c
   self.data = { ... }
@@ -13,7 +13,7 @@ function Primitives:ctor(r, c, ...)
 end
 
 ---@param j number index of a primitive dataset
-function Primitives.get(p, j)
+function Primitive.get(p, j)
   local d = {}
 
   local len = p.r * p.c
@@ -23,7 +23,7 @@ function Primitives.get(p, j)
   return d
 end
 
-function Primitives.put(p, ...)
+function Primitive.put(p, ...)
   local arg = { ... }
   local c, len = #arg, p.r * p.c
   for i = 1, c do
@@ -35,19 +35,24 @@ function Primitives.put(p, ...)
 end
 
 ---@return Bounds
-function Primitives:bounds(i)
-  local p, b = self:get(i), bounds.new()
-  for i = 1, self.c do
-    b:encapsulate(p[i])
+function Primitive.bounds(p)
+  --TODO: caching
+  ---@type Bounds
+  local b = bounds.new()
+  for i = 1, p.count do
+    local vert = p:get(i)
+    for j = 1, p.c do
+      b = b:encapsulate(vert[j])
+    end
   end
 
   return b
 end
 
----@param p Primitives
-function Primitives.centroid(p, i)
-  local b = p:bounds(i)
+---@param p Primitive
+function Primitive.centroid(p)
+  local b = p:bounds()
   return (b.min + b.max) * 0.5
 end
 
-return Primitives
+return Primitive

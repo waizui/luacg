@@ -5,15 +5,15 @@ local MeshGenerator = require("language").newclass("MeshGenerator")
 
 function MeshGenerator.box(pos)
   --TODO: rotation
-  local p1 = data.vec3(pos[1] - 1, pos[2] - 1, pos[3])
-  local p2 = data.vec3(pos[1] + 1, pos[2] - 1, pos[3])
-  local p3 = data.vec3(pos[1] + 1, pos[2] + 1, pos[3])
-  local p4 = data.vec3(pos[1] - 1, pos[2] + 1, pos[3])
+  local p1 = data.vec3(pos[1] - 1, pos[2] - 1, pos[3] + 1)
+  local p2 = data.vec3(pos[1] + 1, pos[2] - 1, pos[3] + 1)
+  local p3 = data.vec3(pos[1] + 1, pos[2] + 1, pos[3] + 1)
+  local p4 = data.vec3(pos[1] - 1, pos[2] + 1, pos[3] + 1)
 
-  local p5 = data.vec3(pos[1] - 1, pos[2] - 1, pos[3] - 4)
-  local p6 = data.vec3(pos[1] + 1, pos[2] - 1, pos[3] - 4)
-  local p7 = data.vec3(pos[1] + 1, pos[2] + 1, pos[3] - 4)
-  local p8 = data.vec3(pos[1] - 1, pos[2] + 1, pos[3] - 4)
+  local p5 = data.vec3(pos[1] - 1, pos[2] - 1, pos[3] - 1)
+  local p6 = data.vec3(pos[1] + 1, pos[2] - 1, pos[3] - 1)
+  local p7 = data.vec3(pos[1] + 1, pos[2] + 1, pos[3] - 1)
+  local p8 = data.vec3(pos[1] - 1, pos[2] + 1, pos[3] - 1)
 
   -- stylua: ignore
   local box = {
