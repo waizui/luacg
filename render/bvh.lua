@@ -10,26 +10,29 @@ local BVNode = lang.newclass("BVNode")
 
 function BVNode:ctor() end
 
----@param p Primitive
-function BVH:ctor(p)
+---@param ... Primitive
+function BVH:ctor(...)
   self.primitives = {}
-  table.insert(self.primitives, p)
+  self:add(...)
 end
 
----@param p Primitive
-function BVH:add(p)
-  table.insert(self.primitives, p)
+---@param ... Primitive
+function BVH:add(...)
+  for _, v in ipairs({ ... }) do
+    table.insert(self.primitives, v)
+  end
   return self
 end
 
 function BVH:build()
-  local b = self:boundingbox()
+  local b = self:centerbounds()
   local mortons = self:buildmortonarray(b)
+  --TODO: radixsort
   table.sort(mortons)
 end
 
---- bounding box of all primitive's centroid 
-function BVH:boundingbox()
+--- bounding box of all primitive's centroid
+function BVH:centerbounds()
   ---@type Bounds
   local b = bounds.new()
   for i = 1, #self.primitives do

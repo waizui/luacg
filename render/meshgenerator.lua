@@ -1,4 +1,5 @@
 local data = require("structures.structure")
+local primitive = require("render.primitive")
 
 ---@class MeshGenerator
 local MeshGenerator = require("language").newclass("MeshGenerator")
@@ -17,19 +18,20 @@ function MeshGenerator.box(pos)
 
   -- stylua: ignore
   local box = {
-    p1, p2, p3,
-    p1, p3, p4,
-    p5, p6, p7,
-    p5, p7, p8,
-    p4, p5, p7,
-    p4, p7, p8,
-    p2, p6, p7,
-    p2, p7, p3,
-    p1, p2, p6,
-    p1, p6, p5,
-    p5, p1, p8,
-    p1, p4, p8,
+    primitive.new(1, 3, p1, p2, p3),
+    primitive.new(1, 3, p1, p3, p4),
+    primitive.new(1, 3, p5, p6, p7),
+    primitive.new(1, 3, p5, p7, p8),
+    primitive.new(1, 3, p4, p5, p7),
+    primitive.new(1, 3, p4, p7, p8),
+    primitive.new(1, 3, p2, p6, p7),
+    primitive.new(1, 3, p2, p7, p3),
+    primitive.new(1, 3, p1, p2, p6),
+    primitive.new(1, 3, p1, p6, p5),
+    primitive.new(1, 3, p5, p1, p8),
+    primitive.new(1, 3, p1, p4, p8),
   }
+
   return box
 end
 

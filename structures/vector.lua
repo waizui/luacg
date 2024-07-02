@@ -74,21 +74,31 @@ function Vector.normalize(a)
 end
 
 function Vector.max(a, b)
+  local v = Vector.new(a.r)
   for i = 1, a.r do
-    if a[i] > b[i] then
-      return a
+    local ai, bi = a[i], b[i]
+    if ai > bi then
+      v[i] = ai
+    else
+      v[i] = bi
     end
   end
 
-  return b
+  return v
 end
 
 function Vector.min(a, b)
-  local r = Vector.max(a, b)
-  if r ~= a then
-    return a
+  local v = Vector.new(a.r)
+  for i = 1, a.r do
+    local ai, bi = a[i], b[i]
+    if ai > bi then
+      v[i] = bi
+    else
+      v[i] = ai
+    end
   end
-  return b
+
+  return v
 end
 
 ---@param iter function

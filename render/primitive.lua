@@ -1,4 +1,3 @@
-local vector = require("structures.vector")
 local bounds = require("render.bounds")
 
 ---@class Primitive
