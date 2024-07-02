@@ -21,6 +21,8 @@ end
 local function buildmortons()
   local b = getgeometry()
   local mortons = b:buildmortonarray(b:centerbounds())
+  local treelets = b:buildtreelets(mortons)
+  b:buildhirachy(treelets, mortons)
   return
 end
 

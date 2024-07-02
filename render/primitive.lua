@@ -7,6 +7,7 @@ local Primitive = require("language").newclass("Primitive")
 function Primitive:ctor(r, c, ...)
   self.r = r
   self.c = c
+  ---@type Vector[]
   self.data = { ... }
   self.count = #self.data / (r * c)
 end

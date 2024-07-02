@@ -5,13 +5,19 @@ local bounds = require("render.bounds")
 ---@class BVH
 local BVH = lang.newclass("BVH")
 
----@class BVNode
-local BVNode = lang.newclass("BVNode")
+---@class BVHNode
+local BVHNode = lang.newclass("BVHNode")
 
-function BVNode:ctor() end
+function BVHNode:ctor() end
+
+function BVHNode:initleaf() end
+
+function BVHNode:initinterior() end
 
 ---@param ... Primitive
 function BVH:ctor(...)
+  self.maxnodes = 255
+  ---@type Primitive[]
   self.primitives = {}
   self:add(...)
 end
@@ -27,8 +33,78 @@ end
 function BVH:build()
   local b = self:centerbounds()
   local mortons = self:buildmortonarray(b)
+  local treelets = self:buildtreelets(mortons)
+  self:buildhirachy(treelets, mortons)
+end
+
+---@param treelets  [number,number][] -- {{start,nprims}}
+---@param mortons [number,number][]  -- {{ code,pindex}}
+function BVH:buildhirachy(treelets, mortons)
+  local orderedprims, nodes = {}, {}
+  local primstart = 1
+  local bit = 29 - 12
+  for _, v in ipairs(treelets) do
+    self:emitBVH(v, mortons, bit, primstart, orderedprims)
+    primstart = primstart + v.nprims
+  end
+
+  self.primitives = orderedprims
+  return nodes
+end
+
+---@param bit number
+---@param treelet [number,number] -- {start,nprims}
+---@param mortons [number,number][]  -- {{ code,pindex}}
+---@param primstart number
+---@param orderedprims table
+function BVH:emitBVH(treelet, mortons, bit, primstart, orderedprims)
+  for offset = 0, treelet.nprims do
+    local mortonindex = treelet.start + offset
+    local pindex = mortons[mortonindex].pindex
+    orderedprims[primstart + offset] = self.primitives[pindex]
+  end
+end
+
+---@param mortons [number,number][]  -- {{ code,pindex}}
+---@return [number,number][] -- {{start,nprims}}
+function BVH:buildtreelets(mortons)
+  -- check hight 12bits , make total 2^12 clusters, 2^4 in every dimension
+  local mask = 0x3FFC0000 --0b00111111111111000000000000000000
+  local s, e = 1, 2
+  local primcount = #mortons
+  local treelet = {}
+  while e <= primcount do
+    if (e == primcount) or ((mortons[s].code & mask) ~= (mortons[e].code & mask)) then
+      local nprims = e - s -- max nodes count will be 2*nprims-1
+      table.insert(treelet, { start = s, nprims = nprims })
+      s = e
+    end
+    e = e + 1
+  end
+
+  return treelet
+end
+
+---@param b Bounds
+---@return [number,number][]  -- {{ code,pindex}}
+function BVH:buildmortonarray(b)
+  local mortonarr, scale = {}, 1 << 10 -- use 10 bits representing morton number
+
+  for i = 1, #self.primitives do
+    ---@type Primitive
+    local prims = self.primitives[i]
+    local p = prims:centroid()
+    local poffset = b:offset(p)
+    local offset = vector.toint(scale * poffset)
+    table.insert(mortonarr, { code = BVH.mortoncode(offset), pindex = i })
+  end
+
   --TODO: radixsort
-  table.sort(mortons)
+  table.sort(mortonarr, function(m1, m2)
+    return m1.code < m2.code -- ascending
+  end)
+
+  return mortonarr
 end
 
 --- bounding box of all primitive's centroid
@@ -44,26 +120,8 @@ function BVH:centerbounds()
   return b
 end
 
----@param b Bounds
-function BVH:buildmortonarray(b)
-  local mortonarr, scale = {}, 1 << 10 -- use 10 bits representing morton number
-
-  for i = 1, #self.primitives do
-    ---@type Primitive
-    local prims = self.primitives[i]
-    for j = 1, prims.count do
-      local p = prims:centroid()
-      local poffset = b:offset(p)
-      local offset = vector.toint(scale * poffset)
-      mortonarr[j] = BVH.mortoncode(offset)
-    end
-  end
-
-  return mortonarr
-end
-
 function BVH.shiftleft3(x)
-  if x == x << 10 then
+  if x == 1 << 10 then
     x = x - 1
   end
 
@@ -76,7 +134,7 @@ end
 
 ---@param v Vector
 function BVH.mortoncode(v)
-  return BVH.shiftleft3(v[1] << 2) | BVH.shiftleft3(v[2] << 1) | BVH.shiftleft3(v[3])
+  return BVH.shiftleft3(v[3]) << 2 | BVH.shiftleft3(v[2]) << 1 | BVH.shiftleft3(v[1])
 end
 
 function BVH.raycast(bvh, src, dir)
@@ -149,4 +207,4 @@ function BVH.mollertrumbore(src, dir, v1, v2, v3)
   end
 end
 
-return BVH, BVNode
+return BVH, BVHNode
