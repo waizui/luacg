@@ -2,33 +2,15 @@ local Lang = require("language")
 local Vector = require("structures.vector")
 local Bounds = require("render.bounds")
 local RefValue = require("structures.refvalue")
-
----@class Morton
----@field code number morton code
----@field pindex number primitive inex
-
----@class Treelet
----@field start number start index of primitives
----@field nprims number primitives count
----@field nodes [BVHNode] nodes created
+local BVHNode = require("render.bvhstructs")
 
 ---@class BVH
 local BVH = Lang.newclass("BVH")
 
----@class BVHNode
-local BVHNode = Lang.newclass("BVHNode")
-
-function BVHNode:initleaf(offset, nprims, bounds)
-  self.primoffset = offset
-  self.nprims = nprims
-  self.bounds = bounds
-end
-
-function BVHNode:initinterior() end
+BVH.MAX_PRIMS_IN_NODE = 255
 
 ---@param ... Primitive
 function BVH:ctor(...)
-  self.MAX_PRIMS_IN_NODE = 255
   ---@type Primitive[]
   self.primitives = {}
   self:add(...)
@@ -56,8 +38,9 @@ function BVH:buildhirachy(treelets, mortons)
   local primoffset = RefValue.new(1)
   local bitindex = 29 - 12
   for _, v in ipairs(treelets) do
-    self:emitBVH(v, mortons, bitindex, primoffset, orderedprims)
+    self:emitBVH(v, mortons, bitindex, primoffset, v.nprims, orderedprims)
     primoffset = primoffset + v.nprims
+    table.insert(nodes, v.nodes)
   end
 
   self.primitives = orderedprims
@@ -67,10 +50,9 @@ end
 ---@param bitindex number
 ---@param treelet Treelet
 ---@param mortons [Morton]
----@param primoffset RefValue
+---@param primoffset RefValue -- start index of primitives that now been processing
 ---@param orderedprims table
-function BVH:emitBVH(treelet, mortons, bitindex, primoffset, orderedprims)
-  local nprims = treelet.nprims
+function BVH:emitBVH(treelet, mortons, bitindex, primoffset, nprims, orderedprims)
   if bitindex < 0 or nprims < BVH.MAX_PRIMS_IN_NODE then
     ---@type Bounds
     local nodebounds = Bounds.new()
@@ -92,12 +74,23 @@ function BVH:emitBVH(treelet, mortons, bitindex, primoffset, orderedprims)
 
   -- if all primitives are in same side of splitting plane
   if (mortons[treelet.start].code & mask) == (mortons[treelet.start + nprims].code & mask) then
-    return self:emitBVH(treelet, mortons, bitindex - 1, primoffset, orderedprims)
+    return self:emitBVH(treelet, mortons, bitindex - 1, primoffset, nprims, orderedprims)
   end
 
   local isplit = BVH.binaryfind(mortons, 1, mask)
+
+  local left = self:emitBVH(treelet, mortons, bitindex - 1, primoffset, isplit - primoffset, orderedprims)
+  local right = self:emitBVH(treelet, mortons, bitindex - 1, primoffset, nprims - (isplit - primoffset), orderedprims)
+  local axis = bitindex % 3
+
+  ---@type BVHNode
+  local node = BVHNode.new()
+  node:initinterior(axis, left, right)
+  return node
 end
 
+-- find spilt index of nodes in a subtree
+-- return the absolute index in motorns array
 ---@param mortons [Morton]
 function BVH.binaryfind(mortons, startindex, mask)
   local size = #mortons - startindex + 1
@@ -112,7 +105,11 @@ function BVH.binaryfind(mortons, startindex, mask)
     end
   end
 
-  return startindex
+  return BVH.clamp(startindex, 1, size)
+end
+
+function BVH.clamp(x, a, b)
+  return math.min(math.max(x, a), b)
 end
 
 ---@param mortons [Morton]
