@@ -7,7 +7,7 @@ local BVHNode = require("render.bvhstructs")
 ---@class BVH
 local BVH = Lang.newclass("BVH")
 
-BVH.MAX_PRIMS_IN_NODE = 255
+BVH.MAX_PRIMS_IN_NODE = 15
 
 ---@param ... Primitive
 function BVH:ctor(...)
@@ -29,6 +29,60 @@ function BVH:build()
   local mortons = self:buildmortonarray(b)
   local treelets = self:buildtreelets(mortons)
   self:buildhirachy(treelets, mortons)
+  self:buildSAH(treelets, b:maxdimension(), b)
+end
+
+---@param treelets [Treelet]
+---@param dim number
+---@param bounds Bounds
+function BVH:buildSAH(treelets, dim, bounds)
+  local nbuckets = 12
+  ---@type [NodeBucket]
+  local buckets = {}
+  for i = 1, nbuckets do
+    buckets[i] = { count = 0, bounds = Bounds.new() }
+  end
+
+  ---@type Bounds
+  for i in #treelets do
+    local treelet = treelets[i]
+    local cent = treelet.node.bounds:centroid()
+    local b = math.floor(nbuckets * bounds:offset(cent)) + 1 --lua index from 1
+    if b == nbuckets + 1 then
+      b = b - 1
+    end
+
+    buckets[b].count = buckets[b] + 1
+    buckets[b].bounds = buckets[b].bounds:union(cent)
+  end
+
+  local nsplits = nbuckets - 1
+  local costs = {}
+
+  ---@type Bounds
+  local boundsbelow, countbelow = Bounds.new(), 0
+  for i = 1, nsplits do
+    boundsbelow = boundsbelow:union(buckets[i].bounds)
+    countbelow = countbelow + buckets[i].count
+    costs[i] = costs[i] + countbelow * boundsbelow:surfacearea()
+  end
+
+  ---@type Bounds
+  local boundsabove, countabove = Bounds.new(), 0
+  for i = 2, nsplits do
+    boundsabove = boundsabove:union(buckets[i].bounds)
+    countabove = countabove + buckets[i].count
+    costs[i - 1] = costs[i - 1] + countabove * boundsabove:surfacearea()
+  end
+
+  local mincost, mincostindex = math.huge, 0
+
+  for i = 1, nsplits do
+    if costs[i] < mincost then
+      mincost = costs[i]
+      mincostindex = i
+    end
+  end
 end
 
 ---@param treelets  [Treelet]
@@ -38,9 +92,9 @@ function BVH:buildhirachy(treelets, mortons)
   local primoffset = RefValue.new(1)
   local bitindex = 29 - 12
   for _, v in ipairs(treelets) do
-    self:emitBVH(v, mortons, bitindex, primoffset, v.nprims, orderedprims)
+    local root = self:emitBVH(v, mortons, bitindex, primoffset, v.nprims, orderedprims)
     primoffset = primoffset + v.nprims
-    table.insert(nodes, v.nodes)
+    v.node = root
   end
 
   self.primitives = orderedprims
@@ -66,7 +120,7 @@ function BVH:emitBVH(treelet, mortons, bitindex, primoffset, nprims, orderedprim
     ---@type BVHNode
     local node = BVHNode.new()
     node:initleaf(primoffset:get(), nprims, nodebounds)
-    table.insert(treelet.nodes, node)
+    table.insert(treelet.node, node)
     return node
   end
 

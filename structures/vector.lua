@@ -118,4 +118,15 @@ function Vector.toint(v)
   return v
 end
 
+function Vector.maxcomponent(v)
+  local max = 1
+  for i = 1, v.r do
+    if v[i] > max then
+      max = i
+    end
+  end
+
+  return max
+end
+
 return Vector

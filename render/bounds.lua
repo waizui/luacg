@@ -2,13 +2,13 @@ local lang = require("language")
 local vector = require("structures.vector")
 
 ---@class Bounds
+---@field max Vector
+---@field min Vector
 local Bounds = lang.newclass("Bounds")
 
 function Bounds:ctor()
 	local v = math.huge
-	---@type Vector
 	self.max = vector.new(3, -v, -v, -v)
-	---@type Vector
 	self.min = vector.new(3, v, v, v)
 end
 
@@ -51,6 +51,25 @@ function Bounds.offset(b, p)
 	end
 
 	return o
+end
+
+---@return Vector
+function Bounds:diagonal()
+	return self.max - self.min
+end
+
+function Bounds:maxdimension()
+	local d = self:diagonal()
+	return d:maxcomponent()
+end
+
+function Bounds:centroid()
+	return (self.min + self.max) * 0.5
+end
+
+function Bounds:surfacearea()
+	local d = self:diagonal()
+	return 2 * (d[1] * d[2] + d[2] * d[3] + d[1] * d[3])
 end
 
 return Bounds

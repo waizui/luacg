@@ -51,8 +51,7 @@ end
 
 ---@param p Primitive
 function Primitive.centroid(p)
-  local b = p:bounds()
-  return (b.min + b.max) * 0.5
+  return p:bounds():centroid()
 end
 
 return Primitive
