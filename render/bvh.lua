@@ -29,13 +29,26 @@ function BVH:build()
   local mortons = self:buildmortonarray(b)
   local treelets = self:buildtreelets(mortons)
   self:buildhirachy(treelets, mortons)
-  self:buildSAH(treelets, b:maxdimension(), b)
+  self:buildSAH(treelets, 0, #treelets)
 end
 
 ---@param treelets [Treelet]
----@param dim number
----@param bounds Bounds
-function BVH:buildSAH(treelets, dim, bounds)
+---@return BVHNode
+function BVH:buildSAH(treelets, start, over)
+  local nNodes = over - start
+  if nNodes == 1 then
+    return treelets[start].node
+  end
+
+  ---@type Bounds, Bounds
+  local centroidbounds, bounds = Bounds.new(), Bounds.new()
+
+  for i = start, over do
+    local tr = treelets[i]
+    bounds = bounds:union(tr.node.bounds)
+    centroidbounds = centroidbounds:union(tr.node.bounds:centroid())
+  end
+
   local nbuckets = 12
   ---@type [NodeBucket]
   local buckets = {}
@@ -43,47 +56,57 @@ function BVH:buildSAH(treelets, dim, bounds)
     buckets[i] = { count = 0, bounds = Bounds.new() }
   end
 
-  ---@type Bounds
-  for i in #treelets do
-    local treelet = treelets[i]
-    local cent = treelet.node.bounds:centroid()
-    local b = math.floor(nbuckets * bounds:offset(cent)) + 1 --lua index from 1
+  local dim = centroidbounds:maxdimension()
+
+  for i in nNodes do
+    local tr = treelets[i]
+    local cent = tr.node.bounds:centroid()
+    local b = math.floor(nbuckets * bounds:offset(cent)[dim]) + 1 --lua index from 1
     if b == nbuckets + 1 then
       b = b - 1
     end
 
     buckets[b].count = buckets[b] + 1
-    buckets[b].bounds = buckets[b].bounds:union(cent)
+    buckets[b].bounds = buckets[b].bounds:union(tr.node.bounds)
   end
 
-  local nsplits = nbuckets - 1
   local costs = {}
 
-  ---@type Bounds
-  local boundsbelow, countbelow = Bounds.new(), 0
-  for i = 1, nsplits do
-    boundsbelow = boundsbelow:union(buckets[i].bounds)
-    countbelow = countbelow + buckets[i].count
-    costs[i] = costs[i] + countbelow * boundsbelow:surfacearea()
+  for i = 1, nbuckets do
+    ---@type Bounds, Bounds
+    local b0, b1 = Bounds.new(), Bounds.new()
+    local count0, count1 = 0, 0
+    for j = 1, i do
+      b0 = b0:union(buckets[j].bounds)
+      count0 = count0 + buckets[j].count
+    end
+
+    for j = i, nbuckets do
+      b1 = b1:union(buckets[j].bounds)
+      count1 = count1 + buckets[j].count
+    end
+
+    costs[i] = 0.125 + (count0 * b0:surfacearea() + count1 * b1:surfacearea()) / bounds:surfacearea()
   end
 
-  ---@type Bounds
-  local boundsabove, countabove = Bounds.new(), 0
-  for i = 2, nsplits do
-    boundsabove = boundsabove:union(buckets[i].bounds)
-    countabove = countabove + buckets[i].count
-    costs[i - 1] = costs[i - 1] + countabove * boundsabove:surfacearea()
-  end
+  local mincost, minsplit = costs[1], 1
 
-  local mincost, mincostindex = math.huge, 0
-
-  for i = 1, nsplits do
+  for i = 1, nbuckets do
     if costs[i] < mincost then
       mincost = costs[i]
-      mincostindex = i
+      minsplit = i
     end
   end
+
+  ---@type BVHNode
+  local node = BVHNode.new()
+  local mid = BVH.partition(treelets, start, over)
+  node:initinterior(dim, self:buildSAH(treelets, 1, mid), self:buildSAH(treelets, mid + 1, over))
+  return node
 end
+
+---@return number --index of mid element
+function BVH.partition(list, start, over, predict) end
 
 ---@param treelets  [Treelet]
 ---@param mortons [Morton]
