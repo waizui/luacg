@@ -29,13 +29,13 @@ function BVH:build()
   local mortons = self:buildmortonarray(b)
   local treelets = self:buildtreelets(mortons)
   self:buildhirachy(treelets, mortons)
-  self:buildSAH(treelets, 0, #treelets)
+  self:buildSAH(treelets, 1, #treelets)
 end
 
 ---@param treelets [Treelet]
----@return BVHNode
+---@return BVHNode|nil
 function BVH:buildSAH(treelets, start, over)
-  local nNodes = over - start
+  local nNodes = over - start + 1
   if nNodes == 1 then
     return treelets[start].node
   end
@@ -46,7 +46,7 @@ function BVH:buildSAH(treelets, start, over)
   for i = start, over do
     local tr = treelets[i]
     bounds = bounds:union(tr.node.bounds)
-    centroidbounds = centroidbounds:union(tr.node.bounds:centroid())
+    centroidbounds = centroidbounds:encapsulate(tr.node.bounds:centroid())
   end
 
   local nbuckets = 12
@@ -58,15 +58,15 @@ function BVH:buildSAH(treelets, start, over)
 
   local dim = centroidbounds:maxdimension()
 
-  for i in nNodes do
+  for i = 1, nNodes do
     local tr = treelets[i]
     local cent = tr.node.bounds:centroid()
-    local b = math.floor(nbuckets * bounds:offset(cent)[dim]) + 1 --lua index from 1
+    local b = math.floor(nbuckets * centroidbounds:offset(cent)[dim]) + 1 --lua index from 1
     if b == nbuckets + 1 then
       b = b - 1
     end
 
-    buckets[b].count = buckets[b] + 1
+    buckets[b].count = buckets[b].count + 1
     buckets[b].bounds = buckets[b].bounds:union(tr.node.bounds)
   end
 
@@ -86,7 +86,8 @@ function BVH:buildSAH(treelets, start, over)
       count1 = count1 + buckets[j].count
     end
 
-    costs[i] = 0.125 + (count0 * b0:surfacearea() + count1 * b1:surfacearea()) / bounds:surfacearea()
+    local s0, s1, s = b0:surfacearea(), b1:surfacearea(), bounds:surfacearea()
+    costs[i] = 0.125 + (count0 * s0 + count1 * s1) / s
   end
 
   local mincost, minsplit = costs[1], 1
@@ -100,14 +101,61 @@ function BVH:buildSAH(treelets, start, over)
 
   ---@type BVHNode
   local node = BVHNode.new()
-  local mid = BVH.partition(treelets, start, over)
-  node:initinterior(dim, self:buildSAH(treelets, 1, mid), self:buildSAH(treelets, mid + 1, over))
+  local mid = BVH.partition(treelets, start, over, function(treelet)
+    ---@type BVHNode
+    local node = treelet.node
+    local cent = node.bounds:centroid()
+
+    local b = math.floor(nbuckets * centroidbounds:offset(cent)[dim]) + 1
+    if b == nbuckets + 1 then
+      b = b - 1
+    end
+
+    return b <= minsplit
+  end)
+
+  node:initinterior(dim, self:buildSAH(treelets, start, mid), self:buildSAH(treelets, mid + 1, over))
   return node
 end
 
+---@param predict function -- return if less than pivot
+---@param list [Treelet]
 ---@return number --index of mid element
-function BVH.partition(list, start, over, predict) end
+function BVH.partition(list, start, over, predict)
+  local i, j = start - 1, over + 1
 
+  while true do
+    while true do
+      i = i + 1
+      if not predict(list[i]) or i == over then
+        break
+      end
+    end
+
+    while true do
+      j = j - 1
+      if predict(list[j]) or j == start then
+        break
+      end
+    end
+
+    if i >= j then
+      break
+    end
+
+    BVH.swap(list, i, j)
+  end
+
+  return j
+end
+
+function BVH.swap(list, i, j)
+  local tmp = list[i]
+  list[i] = list[j]
+  list[j] = tmp
+end
+
+--reorder primitives
 ---@param treelets  [Treelet]
 ---@param mortons [Morton]
 function BVH:buildhirachy(treelets, mortons)
@@ -200,7 +248,7 @@ function BVH:buildtreelets(mortons)
   while e <= primcount do
     if (e == primcount) or ((mortons[s].code & mask) ~= (mortons[e].code & mask)) then
       local nprims = e - s -- max nodes count will be 2*nprims-1
-      table.insert(treelet, { start = s, nprims = nprims, nodes = {} })
+      table.insert(treelet, { start = s, nprims = nprims, node = {} })
       s = e
     end
     e = e + 1

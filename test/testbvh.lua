@@ -22,7 +22,9 @@ local function buildmortons()
   local b = getgeometry()
   local mortons = b:buildmortonarray(b:centerbounds())
   local treelets = b:buildtreelets(mortons)
-  local nodes = b:buildhirachy(treelets, mortons)
+  b:buildhirachy(treelets, mortons)
+  local root = b:buildSAH(treelets, 1, #treelets)
+  print(root)
 end
 
 testboundingbox()
