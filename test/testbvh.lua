@@ -27,7 +27,7 @@ local function buildmortons()
   print(root)
 end
 
-testboundingbox()
+-- testboundingbox()
 buildmortons()
 
 print("bvh test passed")

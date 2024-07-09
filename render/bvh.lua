@@ -58,7 +58,7 @@ function BVH:buildSAH(treelets, start, over)
 
   local dim = centroidbounds:maxdimension()
 
-  for i = 1, nNodes do
+  for i = start, over do
     local tr = treelets[i]
     local cent = tr.node.bounds:centroid()
     local b = math.floor(nbuckets * centroidbounds:offset(cent)[dim]) + 1 --lua index from 1
@@ -185,7 +185,8 @@ function BVH:emitBVH(treelet, mortons, bitindex, primoffset, nprims, orderedprim
       local mortonindex = treelet.start + offset
       local pindex = mortons[mortonindex].pindex
       orderedprims[(primoffset + offset):get()] = self.primitives[pindex]
-      nodebounds = nodebounds:union(self.primitives[pindex]:bounds())
+      local pbounds = self.primitives[pindex]:bounds()
+      nodebounds = nodebounds:union(pbounds)
     end
 
     ---@type BVHNode
