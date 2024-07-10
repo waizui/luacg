@@ -18,16 +18,12 @@ local function testboundingbox()
   assert(b.min == vector.new(3, -2, -2, -2))
 end
 
-local function buildmortons()
+local function testbuild()
   local b = getgeometry()
-  local mortons = b:buildmortonarray(b:centerbounds())
-  local treelets = b:buildtreelets(mortons)
-  b:buildhirachy(treelets, mortons)
-  local root = b:buildSAH(treelets, 1, #treelets)
-  print(root)
+  b:build()
 end
 
 -- testboundingbox()
-buildmortons()
+testbuild()
 
 print("bvh test passed")

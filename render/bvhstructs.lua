@@ -5,9 +5,10 @@ local Lang = require("language")
 ---@field pindex number primitive inex
 
 ---@class Treelet
----@field node BVHNode root node
+---@field nodes BVHNode build nodes
 ---@field start number start index of primitives
 ---@field nprims number primitives count
+---@field root BVHNode
 
 ---@class NodeBucket
 ---@field count number
