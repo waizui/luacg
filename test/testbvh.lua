@@ -20,6 +20,7 @@ local function testbuild()
   ---@type BVH
   local b = bvh.new(table.unpack(box))
   b:build()
+  b.root:print()
 end
 
 -- testboundingbox()

@@ -3,6 +3,7 @@ local Bounds = require("render.bounds")
 local LBHVBuilder = require("render.bvh.linearbvhbuilder")
 
 ---@class BVH
+---@field root BVHNode
 local BVH = Lang.newclass("BVH")
 
 BVH.MAX_PRIMS_IN_NODE = 8
@@ -25,7 +26,7 @@ end
 function BVH:build()
   ---@type LBVHBuilder
   local builder = LBHVBuilder.new(self)
-  builder:build()
+  self.root = builder:build()
 end
 
 --- bounding box of all primitive's centroid

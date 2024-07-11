@@ -16,6 +16,7 @@ function LBVHBuilder:ctor(bvh)
   self.bvh = bvh
 end
 
+---@return BVHNode  -- root of bvh
 function LBVHBuilder:build()
   local b = self.bvh:centerbounds()
   local mortons = self:buildmortonarray(b)
@@ -28,13 +29,11 @@ function LBVHBuilder:build()
     table.insert(nodestobuild, tr.root)
   end
 
-  self:buildSAH(nodestobuild, 1, #treelets)
-
-  print("lbvh build finished")
+  return self:buildSAH(nodestobuild, 1, #treelets)
 end
 
 ---@param nodestobuild [BVHNode]
----@return BVHNode|nil
+---@return BVHNode
 function LBVHBuilder:buildSAH(nodestobuild, start, over)
   local nNodes = over - start + 1
   if nNodes == 1 then
@@ -121,7 +120,13 @@ function LBVHBuilder:buildSAH(nodestobuild, start, over)
     return b <= minsplit
   end)
 
-  node:initinterior(dim, self:buildSAH(nodestobuild, start, mid), self:buildSAH(nodestobuild, mid + 1, over))
+  if mid == over then
+    mid = (start + over) // 2
+  end
+
+  local left = self:buildSAH(nodestobuild, start, mid)
+  local right = self:buildSAH(nodestobuild, mid + 1, over)
+  node:initinterior(dim, left, right)
   return node
 end
 
@@ -162,7 +167,7 @@ function LBVHBuilder.swap(list, i, j)
   list[j] = tmp
 end
 
---reorder primitives
+--reorder primitives by using the order of motorns
 ---@param treelets  [Treelet]
 ---@param mortons [Morton]
 function LBVHBuilder:buildhirachy(treelets, mortons)
@@ -195,11 +200,11 @@ function LBVHBuilder:emitBVH(treelet, mortons, bitindex, primoffset, nprims, ord
       nodebounds = nodebounds:union(pbounds)
     end
 
-    primoffset = primoffset + nprims
     ---@type BVHNode
     local node = BVHNode.new()
     node:initleaf(primoffset:get(), nprims, nodebounds)
     table.insert(treelet.nodes, node)
+    primoffset = primoffset + nprims
     return node
   end
 
@@ -245,7 +250,7 @@ function LBVHBuilder.clamp(x, a, b)
   return math.min(math.max(x, a), b)
 end
 
---buid treelets for parallel building
+--buid treelets for parallel building, finding primitives clusters in a treelet
 ---@param mortons [Morton]
 ---@return [Treelet]
 function LBVHBuilder:buildtreelets(mortons)
