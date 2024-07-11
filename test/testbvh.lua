@@ -1,9 +1,6 @@
-local bvh = require("render.bvh")
+local bvh = require("render.bvh.bvh")
 local vector = require("structures.vector")
-local data = require("structures.structure")
-local render = require("render.render")
 local mesh = require("render.meshgenerator")
-local writebuf = require("util.pngencoder")
 
 ---@return BVH
 local function getgeometry()

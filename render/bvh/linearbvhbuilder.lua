@@ -4,19 +4,17 @@ local Bounds = require("render.bounds")
 local RefValue = require("structures.refvalue")
 local BVHNode = require("render.bvh.bvhstructs")
 
-
 ---@class LBVHBuilder
----@field bvh BVH 
+---@field bvh BVH
 local LBVHBuilder = Lang.newclass("LBVHBuilder")
 
 function LBVHBuilder:ctor(bvh)
   if not bvh then
-    error("no bvh provided",-1)
+    error("no bvh provided", -1)
   end
 
   self.bvh = bvh
 end
-
 
 function LBVHBuilder:build()
   local b = self.bvh:centerbounds()
@@ -34,7 +32,6 @@ function LBVHBuilder:build()
 
   print("lbvh build finished")
 end
-
 
 ---@param nodestobuild [BVHNode]
 ---@return BVHNode|nil
@@ -177,7 +174,7 @@ function LBVHBuilder:buildhirachy(treelets, mortons)
     v.root = root
   end
 
-  self.primitives = orderedprims
+  self.bvh.primitives = orderedprims
   return nodes
 end
 
@@ -187,14 +184,14 @@ end
 ---@param primoffset RefValue -- start index of primitives that now been processing
 ---@param orderedprims table
 function LBVHBuilder:emitBVH(treelet, mortons, bitindex, primoffset, nprims, orderedprims)
-  if bitindex < 0 or nprims < LBVHBuilder.MAX_PRIMS_IN_NODE then
+  if bitindex < 0 or nprims < self.bvh.MAX_PRIMS_IN_NODE then
     ---@type Bounds
     local nodebounds = Bounds.new()
     for offset = 0, nprims - 1 do
       local mortonindex = treelet.start + offset
       local pindex = mortons[mortonindex].pindex
-      orderedprims[primoffset:get() + offset] = self.primitives[pindex]
-      local pbounds = self.primitives[pindex]:bounds()
+      orderedprims[primoffset:get() + offset] = self.bvh.primitives[pindex]
+      local pbounds = self.bvh.primitives[pindex]:bounds()
       nodebounds = nodebounds:union(pbounds)
     end
 
@@ -254,11 +251,11 @@ end
 function LBVHBuilder:buildtreelets(mortons)
   -- check hight 12bits , make total 2^12 clusters, 2^4 in every dimension
   local mask = 0x3FFC0000 --0b00111111111111000000000000000000
-  local s, e = 1, 2 --start , end1
+  local s, e = 1, 2      --start , end
   local primcount = #mortons
   local treelet = {}
-  while e <= primcount do
-    if (e == primcount) or ((mortons[s].code & mask) ~= (mortons[e].code & mask)) then
+  while e <= primcount + 1 do
+    if (e == primcount + 1) or ((mortons[s].code & mask) ~= (mortons[e].code & mask)) then
       local nprims = e - s -- max nodes count will be 2*nprims-1
       table.insert(treelet, { start = s, nprims = nprims, nodes = {} })
       s = e
@@ -274,9 +271,9 @@ end
 function LBVHBuilder:buildmortonarray(b)
   local mortonarr, scale = {}, 1 << 10 -- use 10 bits representing morton number
 
-  for i = 1, #self.primitives do
+  for i = 1, #self.bvh.primitives do
     ---@type Primitive
-    local prims = self.primitives[i]
+    local prims = self.bvh.primitives[i]
     local p = prims:centroid()
     local poffset = b:offset(p)
     local offset = Vector.toint(scale * poffset)
@@ -307,6 +304,5 @@ end
 function LBVHBuilder.mortoncode(v)
   return LBVHBuilder.shiftleft3(v[3]) << 2 | LBVHBuilder.shiftleft3(v[2]) << 1 | LBVHBuilder.shiftleft3(v[1])
 end
-
 
 return LBVHBuilder
