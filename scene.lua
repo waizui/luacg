@@ -1,7 +1,7 @@
 local writebuf = require("util.pngencoder")
 local data = require("structures.structure")
 local render = require("render.render")
-local bvh = require("render.bvh")
+local bvh = require("render.bvh.bvh")
 local mesh = require("render.meshgenerator")
 local vector = require("structures.vector")
 

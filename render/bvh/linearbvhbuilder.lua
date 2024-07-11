@@ -2,30 +2,24 @@ local Lang = require("language")
 local Vector = require("structures.vector")
 local Bounds = require("render.bounds")
 local RefValue = require("structures.refvalue")
-local BVHNode = require("render.bvhstructs")
+local BVHNode = require("render.bvh.bvhstructs")
 
----@class BVH
-local BVH = Lang.newclass("BVH")
 
-BVH.MAX_PRIMS_IN_NODE = 15
+---@class LBVHBuilder
+---@field bvh BVH 
+local LBVHBuilder = Lang.newclass("LBVHBuilder")
 
----@param ... Primitive
-function BVH:ctor(...)
-  ---@type Primitive[]
-  self.primitives = {}
-  self:add(...)
-end
-
----@param ... Primitive
-function BVH:add(...)
-  for _, v in ipairs({ ... }) do
-    table.insert(self.primitives, v)
+function LBVHBuilder:ctor(bvh)
+  if not bvh then
+    error("no bvh provided",-1)
   end
-  return self
+
+  self.bvh = bvh
 end
 
-function BVH:build()
-  local b = self:centerbounds()
+
+function LBVHBuilder:build()
+  local b = self.bvh:centerbounds()
   local mortons = self:buildmortonarray(b)
   local treelets = self:buildtreelets(mortons)
   self:buildhirachy(treelets, mortons)
@@ -38,12 +32,13 @@ function BVH:build()
 
   self:buildSAH(nodestobuild, 1, #treelets)
 
-  return
+  print("lbvh build finished")
 end
+
 
 ---@param nodestobuild [BVHNode]
 ---@return BVHNode|nil
-function BVH:buildSAH(nodestobuild, start, over)
+function LBVHBuilder:buildSAH(nodestobuild, start, over)
   local nNodes = over - start + 1
   if nNodes == 1 then
     return nodestobuild[start]
@@ -119,7 +114,7 @@ function BVH:buildSAH(nodestobuild, start, over)
 
   ---@type BVHNode
   local node = BVHNode.new()
-  local mid = BVH.partition(nodestobuild, start, over, function(node)
+  local mid = LBVHBuilder.partition(nodestobuild, start, over, function(node)
     local cent = node.bounds:centroid()
     local b = math.floor(nbuckets * centroidbounds:offset(cent)[dim]) + 1
     if b == nbuckets + 1 then
@@ -136,7 +131,7 @@ end
 ---@param predict function -- return if less than pivot
 ---@param list [BVHNode]
 ---@return number --index of mid element
-function BVH.partition(list, start, over, predict)
+function LBVHBuilder.partition(list, start, over, predict)
   local i, j = start - 1, over + 1
 
   while true do
@@ -158,13 +153,13 @@ function BVH.partition(list, start, over, predict)
       break
     end
 
-    BVH.swap(list, i, j)
+    LBVHBuilder.swap(list, i, j)
   end
 
   return j
 end
 
-function BVH.swap(list, i, j)
+function LBVHBuilder.swap(list, i, j)
   local tmp = list[i]
   list[i] = list[j]
   list[j] = tmp
@@ -173,7 +168,7 @@ end
 --reorder primitives
 ---@param treelets  [Treelet]
 ---@param mortons [Morton]
-function BVH:buildhirachy(treelets, mortons)
+function LBVHBuilder:buildhirachy(treelets, mortons)
   local orderedprims, nodes = {}, {}
   local primoffset = RefValue.new(1)
   local bitindex = 29 - 12
@@ -191,11 +186,11 @@ end
 ---@param mortons [Morton]
 ---@param primoffset RefValue -- start index of primitives that now been processing
 ---@param orderedprims table
-function BVH:emitBVH(treelet, mortons, bitindex, primoffset, nprims, orderedprims)
-  if bitindex < 0 or nprims < BVH.MAX_PRIMS_IN_NODE then
+function LBVHBuilder:emitBVH(treelet, mortons, bitindex, primoffset, nprims, orderedprims)
+  if bitindex < 0 or nprims < LBVHBuilder.MAX_PRIMS_IN_NODE then
     ---@type Bounds
     local nodebounds = Bounds.new()
-    for offset = 0, nprims do
+    for offset = 0, nprims - 1 do
       local mortonindex = treelet.start + offset
       local pindex = mortons[mortonindex].pindex
       orderedprims[primoffset:get() + offset] = self.primitives[pindex]
@@ -218,7 +213,7 @@ function BVH:emitBVH(treelet, mortons, bitindex, primoffset, nprims, orderedprim
     return self:emitBVH(treelet, mortons, bitindex - 1, primoffset, nprims, orderedprims)
   end
 
-  local isplit = BVH.binaryfind(mortons, 1, mask)
+  local isplit = LBVHBuilder.binaryfind(mortons, 1, mask)
 
   local left = self:emitBVH(treelet, mortons, bitindex - 1, primoffset, isplit - primoffset, orderedprims)
   local right = self:emitBVH(treelet, mortons, bitindex - 1, primoffset, nprims - (isplit - primoffset), orderedprims)
@@ -233,7 +228,7 @@ end
 -- find spilt index of nodes in a subtree
 -- return the absolute index in motorns array
 ---@param mortons [Morton]
-function BVH.binaryfind(mortons, startindex, mask)
+function LBVHBuilder.binaryfind(mortons, startindex, mask)
   local size = #mortons - startindex + 1
   while size > 0 do
     local half = math.floor(size / 2)
@@ -246,20 +241,20 @@ function BVH.binaryfind(mortons, startindex, mask)
     end
   end
 
-  return BVH.clamp(startindex, 1, size)
+  return LBVHBuilder.clamp(startindex, 1, size)
 end
 
-function BVH.clamp(x, a, b)
+function LBVHBuilder.clamp(x, a, b)
   return math.min(math.max(x, a), b)
 end
 
 --buid treelets for parallel building
 ---@param mortons [Morton]
 ---@return [Treelet]
-function BVH:buildtreelets(mortons)
+function LBVHBuilder:buildtreelets(mortons)
   -- check hight 12bits , make total 2^12 clusters, 2^4 in every dimension
   local mask = 0x3FFC0000 --0b00111111111111000000000000000000
-  local s, e = 1, 2
+  local s, e = 1, 2 --start , end1
   local primcount = #mortons
   local treelet = {}
   while e <= primcount do
@@ -276,7 +271,7 @@ end
 
 ---@param b Bounds
 ---@return [number,number][]  -- {{ code,pindex}}
-function BVH:buildmortonarray(b)
+function LBVHBuilder:buildmortonarray(b)
   local mortonarr, scale = {}, 1 << 10 -- use 10 bits representing morton number
 
   for i = 1, #self.primitives do
@@ -285,7 +280,7 @@ function BVH:buildmortonarray(b)
     local p = prims:centroid()
     local poffset = b:offset(p)
     local offset = Vector.toint(scale * poffset)
-    table.insert(mortonarr, { code = BVH.mortoncode(offset), pindex = i })
+    table.insert(mortonarr, { code = LBVHBuilder.mortoncode(offset), pindex = i })
   end
 
   --TODO: radixsort
@@ -296,20 +291,7 @@ function BVH:buildmortonarray(b)
   return mortonarr
 end
 
---- bounding box of all primitive's centroid
-function BVH:centerbounds()
-  ---@type Bounds
-  local b = Bounds.new()
-  for i = 1, #self.primitives do
-    ---@type Primitive
-    local prims = self.primitives[i]
-    b = b:encapsulate(prims:centroid())
-  end
-
-  return b
-end
-
-function BVH.shiftleft3(x)
+function LBVHBuilder.shiftleft3(x)
   if x == 1 << 10 then
     x = x - 1
   end
@@ -322,78 +304,9 @@ function BVH.shiftleft3(x)
 end
 
 ---@param v Vector
-function BVH.mortoncode(v)
-  return BVH.shiftleft3(v[3]) << 2 | BVH.shiftleft3(v[2]) << 1 | BVH.shiftleft3(v[1])
+function LBVHBuilder.mortoncode(v)
+  return LBVHBuilder.shiftleft3(v[3]) << 2 | LBVHBuilder.shiftleft3(v[2]) << 1 | LBVHBuilder.shiftleft3(v[1])
 end
 
-function BVH.raycast(bvh, src, dir)
-  --
-end
 
----@param bvh BVH
-function BVH.naiveraycast(bvh, src, dir)
-  local depth = math.huge
-  local hit = nil
-  for i = 1, #bvh.primitives do
-    local p = bvh.primitives[i]
-    for j = 1, p.count do
-      local obj = p:get(j)
-      local v1, v2, v3 = obj[1], obj[2], obj[3]
-      local res = BVH.mollertrumbore(src, dir, v1, v2, v3)
-      if res then
-        local d = (res - src):dot(dir)
-        if d < depth then
-          depth = d
-          hit = res
-        end
-      end
-    end
-  end
-
-  return hit
-end
-
--- moller trumbore raycast algorithm
--- ref: https://www.graphics.cornell.edu/pubs/1997/MT97.pdf
----@param dir Vector
----@param src Vector
----@param v1 Vector
----@param v2 Vector
----@param v3 Vector
-function BVH.mollertrumbore(src, dir, v1, v2, v3)
-  ---@type Vector
-  local e1, e2 = v2 - v1, v3 - v1
-  -- volume of parallelpiped e1, e2, dir
-  -- ref: https://en.wikipedia.org/wiki/Triple_product
-  local dirxe2 = dir:cross(e2)
-  local vol = e1:dot(dirxe2)
-
-  -- ray parallel  to triangle
-  if math.abs(vol) < 1e-19 then
-    return
-  end
-
-  -- determinant equals vol: dot(a,cross(b,c)) = det([a,b,c])
-  local invdet, s = 1 / vol, src - v1
-  -- cramer's rule xi = det(Ai)/det(A)
-  local u = invdet * s:dot(dirxe2)
-  if u < 0 or u > 1 then
-    return
-  end
-
-  local sxe1 = s:cross(e1)
-  local v = invdet * dir:dot(sxe1)
-  -- careful check u + v > 1 they can be both less than 1
-  if v < 0 or u + v > 1 then
-    return
-  end
-
-  local t = invdet * e2:dot(sxe1)
-
-  if t > 1e-19 then
-    local hit = src + dir * t
-    return hit
-  end
-end
-
-return BVH, BVHNode
+return LBVHBuilder

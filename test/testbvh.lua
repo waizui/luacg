@@ -19,7 +19,9 @@ local function testboundingbox()
 end
 
 local function testbuild()
-  local b = getgeometry()
+  local box = mesh.box(vector.new(3, 0, 0, 0))
+  ---@type BVH
+  local b = bvh.new(table.unpack(box))
   b:build()
 end
 
