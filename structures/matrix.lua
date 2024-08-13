@@ -6,6 +6,9 @@ local Matrix = lang.newclass("Matrix")
 
 function Matrix:ctor(r, c, ...)
   local args = { ... }
+  if #args == 1 then
+    args = args[1]
+  end
   self.c = c
   self.r = r
   for i, v in ipairs(args) do
@@ -71,6 +74,19 @@ function Matrix.copy(om)
   for r = 1, m.r do
     for c = 1, m.c do
       m:set(r, c, om:get(r, c))
+    end
+  end
+
+  return m
+end
+
+---@return Matrix
+function Matrix.transpose(om)
+  local m = Matrix.new(om.r, om.c)
+
+  for c = 1, m.c do
+    for r = 1, m.r do
+      m:set(r, c, om:get(c, r))
     end
   end
 

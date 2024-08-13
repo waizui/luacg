@@ -5,7 +5,7 @@ local Camera = require("language").newclass("Camera")
 
 function Camera:ctor(p, v, near, far, fov, aspect)
   -- TODO: world to viewspace transform
-  -- https://learnwebgl.brown37.net/08_projections/projections_perspective.html
+  -- a good explanation:  https://learnwebgl.brown37.net/08_projections/projections_perspective.html
   p = p or data.vec3(0, 0, 0)
   v = v or data.vec3(0, 0, -1)
   near = near or 0.25
