@@ -59,7 +59,7 @@ function Quaternion:matrix()
 end
 
 ---@param p Vector 3d
-function Quaternion:rotatepos(p)
+function Quaternion:rotatevec(p)
   local mat = self:matrix()
   return mat:mul(p)
 end
