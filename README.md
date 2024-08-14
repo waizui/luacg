@@ -39,6 +39,10 @@ The execution results will be placed in the folder of this project.
 
 ![2](./pic/raycast_preview.png)
 
+### 3. quaternion and rotation
+
+![3](./pic/rotation_preview.png)
+
 ## References
 
 [Appied Computer Graphics by Prof. Nobuyuki Umetani](https://github.com/ACG-2024S/acg)
