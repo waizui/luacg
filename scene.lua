@@ -7,16 +7,16 @@ local vector = require("structures.vector")
 local quaternion = require("structures.quaternion")
 
 local function homo(p)
-  return vector.new(4, p[1], p[2], p[3], 1)
+  return vector.new(4, p[1], p[2], p[3] - 4, 1)
 end
 
 local barycentric_coordinates = function(w, h)
-  local rotation = quaternion.angle(45, vector.new(3, 0, 1, 0))
+  local rotation = quaternion.angle(-45, vector.new(3, 1, 0, 0))
 
-  local p1 = homo(rotation:rotatepos(vector.new(3, -1, -1, -4)))
-  local p2 = homo(rotation:rotatepos(vector.new(3, 1, -1, -4)))
-  local p3 = homo(rotation:rotatepos(vector.new(3, 1, 1, -8)))
-  local p4 = homo(rotation:rotatepos(vector.new(3, -1, 1, -8)))
+  local p1 = homo(rotation:rotatevec(vector.new(3, -1, -1, 0)))
+  local p2 = homo(rotation:rotatevec(vector.new(3, 1, -1, 0)))
+  local p3 = homo(rotation:rotatevec(vector.new(3, 1, 1, 0)))
+  local p4 = homo(rotation:rotatevec(vector.new(3, -1, 1, 0)))
 
   local uv1, uv2 = data.vec2(0, 0), data.vec2(1, 0)
   local uv3, uv4 = data.vec2(1, 1), data.vec2(0, 1)
