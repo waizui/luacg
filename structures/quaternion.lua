@@ -56,6 +56,12 @@ function Quaternion:matrix()
   })
 end
 
+---@param p Vector 3d 
+function Quaternion:rotatepos(p)
+  local mat = self:matrix()
+  return mat:mul(p)
+end
+
 -- rotate a by b
 ---@param a Quaternion
 ---@param b Quaternion
