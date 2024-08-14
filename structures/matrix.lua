@@ -4,6 +4,8 @@ local op = require("structures.operation")
 ---@class Matrix
 local Matrix = lang.newclass("Matrix")
 
+local epsilon = 1e-15
+
 function Matrix:ctor(r, c, ...)
   local args = { ... }
   if #args == 1 then
@@ -121,7 +123,7 @@ function Matrix.scalerow(m, r, factor)
   for i = 1, m.c do
     local v = m:get(r, i)
     if v then
-      if math.abs(v - 0) < 1e-19 then
+      if math.abs(v - 0) < epsilon then
         m:set(r, i, 0)
       else
         m:set(r, i, v * factor)
@@ -133,7 +135,7 @@ function Matrix.scalerow(m, r, factor)
 end
 
 function Matrix.iszero(n)
-  return (not n) or (math.abs(n) <= 1e-19)
+  return (not n) or (math.abs(n) <= epsilon)
 end
 
 function Matrix.eliminate(m, am, sr, sc) --start row , stat col
