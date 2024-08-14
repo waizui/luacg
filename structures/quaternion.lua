@@ -50,6 +50,7 @@ function Quaternion:matrix()
   local r, i, j, k = self.r, self.i, self.j, self.k
 
   -- stylua: ignore
+  -- unit quaterion, the element at [1,1] is 1, not affecting calculation, thus omited
   return matrix.new(3, 3, {
     1 - 2 * (j * j + k * k), 2 * (i * j - r * k), 2 * (i * k + r * j),
     2 * (i * j + r * k), 1 - 2 * (i * i + k * k), 2 * (j * k - r * i),
