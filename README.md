@@ -43,4 +43,6 @@ The execution results will be placed in the folder of this project.
 
 [Appied Computer Graphics by Prof. Nobuyuki Umetani](https://github.com/ACG-2024S/acg)
 
+[pbr-book](https://pbr-book.org/4ed/contents)
+
 [lua-pngencoder](https://github.com/wyozi/lua-pngencoder)

@@ -1,6 +1,6 @@
 local vector = require("structures.vector")
 local matrix = require("structures.matrix")
-local primitives = require("render.primitives")
+local primitive = require("render.primitive")
 
 local M = {}
 
@@ -26,9 +26,9 @@ function M.mat4x4(...)
 end
 
 ---@param ... 123:vertex, 456:uv
----@return Primitives
-function M.primitives(r,c,...)
-  return primitives.new(r, c, ...)
+---@return Primitive
+function M.primitive(r,c,...)
+  return primitive.new(r, c, ...)
 end
 
 return M

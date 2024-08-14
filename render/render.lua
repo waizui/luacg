@@ -9,12 +9,12 @@ function Render.camera(p, v, near, far, fov, aspect)
   return Camera.new(p, v, near, far, fov, aspect)
 end
 
----@param primitives Primitives
-function Render.naiverasterize(w, h, primitives, buf, cb)
+---@param primitive Primitive
+function Render.naiverasterize(w, h, primitive, buf, cb)
   local matvp = Render.camera().matrixVP
 
-  for ip = 1, primitives.count do
-    local p = primitives:get(ip)
+  for ip = 1, primitive.count do
+    local p = primitive:get(ip)
 
     local p1, p2, p3 = p[1], p[2], p[3]
     local uv1, uv2, uv3 = p[4], p[5], p[6]

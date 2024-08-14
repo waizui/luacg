@@ -1,11 +1,15 @@
 local lang = require("language")
 local op = require("structures.operation")
+local epsilon = require("util.mathutil").epsilon
 
 ---@class Matrix
 local Matrix = lang.newclass("Matrix")
 
 function Matrix:ctor(r, c, ...)
   local args = { ... }
+  if #args == 1 then
+    args = args[1]
+  end
   self.c = c
   self.r = r
   for i, v in ipairs(args) do
@@ -61,6 +65,7 @@ function Matrix.setrow(m, r, ...)
   end
 end
 
+---@return Matrix
 function Matrix.mul(m1, m2)
   local m = Matrix.new(m1.r, m2.c)
   return op.dot(m, m1, m2)
@@ -71,6 +76,19 @@ function Matrix.copy(om)
   for r = 1, m.r do
     for c = 1, m.c do
       m:set(r, c, om:get(r, c))
+    end
+  end
+
+  return m
+end
+
+---@return Matrix
+function Matrix.transpose(om)
+  local m = Matrix.new(om.r, om.c)
+
+  for c = 1, m.c do
+    for r = 1, m.r do
+      m:set(r, c, om:get(c, r))
     end
   end
 
@@ -105,7 +123,7 @@ function Matrix.scalerow(m, r, factor)
   for i = 1, m.c do
     local v = m:get(r, i)
     if v then
-      if math.abs(v - 0) < 1e-19 then
+      if math.abs(v - 0) < epsilon then
         m:set(r, i, 0)
       else
         m:set(r, i, v * factor)
@@ -117,7 +135,7 @@ function Matrix.scalerow(m, r, factor)
 end
 
 function Matrix.iszero(n)
-  return (not n) or (math.abs(n) <= 1e-19)
+  return (not n) or (math.abs(n) <= epsilon)
 end
 
 function Matrix.eliminate(m, am, sr, sc) --start row , stat col
