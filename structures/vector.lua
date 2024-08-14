@@ -1,5 +1,6 @@
 local lang = require("language")
 local op = require("structures.operation")
+local mathutil = require("util.mathutil")
 
 ---@class Vector
 local Vector = lang.newclass("Vector")
@@ -46,7 +47,7 @@ end
 
 function Vector.__eq(a, b)
   for i = 1, a.r do
-    if a[i] ~= b[i] then
+    if not mathutil.approximate(a[i], b[i]) then
       return false
     end
   end

@@ -44,13 +44,13 @@ function Quaternion:rotate(degree, axis)
   return self * q
 end
 
---3x3
+--3x3 matrix representation of formular: pr = q*p*q^-1
 ---@return Matrix
 function Quaternion:matrix()
   local r, i, j, k = self.r, self.i, self.j, self.k
 
   -- stylua: ignore
-  -- unit quaterion, the element at [1,1] is 1, not affecting calculation, thus omited
+  -- unit quaterion, the element at [1,1] of origin 4x4 matrix is 1, not affecting calculation, thus omitted
   return matrix.new(3, 3, {
     1 - 2 * (j * j + k * k), 2 * (i * j - r * k), 2 * (i * k + r * j),
     2 * (i * j + r * k), 1 - 2 * (i * i + k * k), 2 * (j * k - r * i),
@@ -58,20 +58,28 @@ function Quaternion:matrix()
   })
 end
 
----@param p Vector 3d
-function Quaternion:rotatevec(p)
-  local mat = self:matrix()
-  return mat:mul(p)
+---@return Quaternion
+function Quaternion:conjugate()
+  return Quaternion.new(self.r, -self.i, -self.j, -self.k)
 end
 
--- rotate a by b
+---@param p Vector 3d
+---@return Vector 3d
+function Quaternion:rotatevec(p)
+  local res = self:matrix():mul(p)
+  return vector.new(3, res[1], res[2], res[3])
+end
+
+-- composing two quaterions by order a,b
 ---@param a Quaternion
 ---@param b Quaternion
 ---@return Quaternion
 function Quaternion.__mul(a, b)
-  local v = vector.new(3, a.i, a.j, a.k)
-  local v1 = b:matrix():mul(v)
-  return Quaternion.new(a.r, v1[1], v1[2], v1[3])
+  local r = a.r * b.r - (a.i * b.i + a.j * b.j + a.k * b.k) -- a1a2−(b1b2+c1c2+d1d2)
+  local i = a.r * b.i + b.r * a.i + a.j * b.k - a.k * b.j  -- a1b2+a2b1+c1d2−d1c2
+  local j = a.r * b.j + b.r * a.j - a.i * b.k + a.k * b.i  -- a1c2+a2c1−b1d2+d1b2
+  local k = a.r * b.k + b.r * a.k + a.i * b.j - a.j * b.i  -- a1d2+a2d1+b1c2−c1b2
+  return Quaternion.new(r, i, j, k)
 end
 
 return Quaternion

@@ -1,10 +1,9 @@
 local lang = require("language")
 local op = require("structures.operation")
+local epsilon = require("util.mathutil").epsilon
 
 ---@class Matrix
 local Matrix = lang.newclass("Matrix")
-
-local epsilon = 1e-15
 
 function Matrix:ctor(r, c, ...)
   local args = { ... }
@@ -66,6 +65,7 @@ function Matrix.setrow(m, r, ...)
   end
 end
 
+---@return Matrix
 function Matrix.mul(m1, m2)
   local m = Matrix.new(m1.r, m2.c)
   return op.dot(m, m1, m2)
