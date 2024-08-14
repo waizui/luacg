@@ -217,4 +217,4 @@ local function writebuf(buf, w, h, fname)
   file:close()
 end
 
-return writebuf, begin
+return writebuf

@@ -29,6 +29,8 @@ end
 ---@return Quaternion
 function Quaternion.euler(x, y, z) end
 
+---@param degree number rotation in degree
+---@param axis Vector rotation axis
 ---@return Quaternion
 function Quaternion.angle(degree, axis)
   local rad = math.rad(degree)
