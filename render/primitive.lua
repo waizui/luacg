@@ -1,8 +1,13 @@
 local bounds = require("render.bounds")
 
 ---@class Primitive
+---@field count number number of dataset
+---@field r number rows of data table
+---@field c number columns of data table
+---@field data table store dataset use the structure of data table definied by row and column
 local Primitive = require("language").newclass("Primitive")
 
+-- first row is vertex 
 ---@param r number row of data table eg. r=2,c=2 meaning 2x2 dataset
 function Primitive:ctor(r, c, ...)
   self.r = r
@@ -13,6 +18,8 @@ function Primitive:ctor(r, c, ...)
 end
 
 ---@param j number index of a primitive dataset
+---@param p Primitive
+---@return table flatten data at index j
 function Primitive.get(p, j)
   local d = {}
 
@@ -23,6 +30,7 @@ function Primitive.get(p, j)
   return d
 end
 
+---@param p Primitive
 function Primitive.put(p, ...)
   local arg = { ... }
   local c, len = #arg, p.r * p.c

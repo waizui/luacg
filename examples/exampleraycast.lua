@@ -12,12 +12,14 @@ local function raycast(w, h)
     return { d, d, d }
   end
 
-  local buf = {}
   local box = mesh.box(vector.new(3, -1.5, -1.5, -6))
   local sphere = mesh.sphere(vector.new(3, 1.5, 1.5, -6), 1)
-  local primitive = data.primitive(1, 3, table.unpack(sphere))
-  primitive:put(table.unpack(box))
-  local b = bvh.new(primitive)
+
+  ---@type BVH
+  local b = bvh.new(data.primitive(1, 3, table.unpack(sphere)))
+  b:add(data.primitive(1, 3, table.unpack(box)))
+
+  local buf = {}
   render.raycastrasetrize(w, h, b, buf, cb)
   writebuf(buf, w, h, "./raycast.png")
 end

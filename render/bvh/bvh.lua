@@ -1,6 +1,7 @@
 local Lang = require("language")
 local Bounds = require("render.bounds")
 local LBHVBuilder = require("render.bvh.linearbvhbuilder")
+local epsilon = require("util.mathutil").epsilon
 
 ---@class BVH
 ---@field root BVHNode
@@ -86,7 +87,7 @@ function BVH.mollertrumbore(src, dir, v1, v2, v3)
   local vol = e1:dot(dirxe2)
 
   -- ray parallel  to triangle
-  if math.abs(vol) < 1e-19 then
+  if math.abs(vol) < epsilon then
     return
   end
 
@@ -107,7 +108,7 @@ function BVH.mollertrumbore(src, dir, v1, v2, v3)
 
   local t = invdet * e2:dot(sxe1)
 
-  if t > 1e-19 then
+  if t > epsilon then
     local hit = src + dir * t
     return hit
   end
