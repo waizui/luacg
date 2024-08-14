@@ -31,7 +31,8 @@ function Quaternion.euler(x, y, z) end
 
 ---@return Quaternion
 function Quaternion.angle(degree, axis)
-  local c, s = math.cos(degree), math.sin(degree)
+  local rad = math.rad(degree)
+  local c, s = math.cos(rad / 2), math.sin(rad / 2)
   local v = axis:normalize() * s
   return Quaternion.new(c, v[1], v[2], v[3])
 end
@@ -56,7 +57,7 @@ function Quaternion:matrix()
   })
 end
 
----@param p Vector 3d 
+---@param p Vector 3d
 function Quaternion:rotatepos(p)
   local mat = self:matrix()
   return mat:mul(p)
