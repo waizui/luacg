@@ -59,14 +59,23 @@ function Camera:lookat(v)
   self.dir = v
 
   local pos = self.pos
-
+  --[[
+  let Vw be vector in world space, Vv be view space, T be view transformation
+  denoted by TVw = Vv,  because Vw = T^-1Vv, so T is the inverse of view to world transformation
+  orthgonal matrix inverse is transpose
+  ]]
   -- stylua: ignore
   local vmat = data.mat4x4(
-    right[1], up[1], forward[1], -pos[1],
-    right[2], up[2], forward[2], -pos[2],
-    right[3], up[3], forward[3], -pos[3],
+    right[1], up[1], forward[1], 0,
+    right[2], up[2], forward[2], 0,
+    right[3], up[3], forward[3], 0,
     0, 0, 0, 1
-  )
+  ):transpose()
+
+  -- translation
+  vmat:set(1, 4, -pos[1])
+  vmat:set(2, 4, -pos[2])
+  vmat:set(3, 4, -pos[3])
 
   self.matrixV = vmat
   self.matrixVP = self.matrixP:mul(vmat)
