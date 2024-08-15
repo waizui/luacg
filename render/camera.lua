@@ -1,11 +1,13 @@
 local data = require("structures.structure")
 
 ---@class Camera
+---@field matrixP Matrix projection transform
+---@field matrixV Matrix view transform
+---@field matrixVP Matrix world to projection transform
+---@field dir Vector view direction, shoot out from camera
 local Camera = require("language").newclass("Camera")
 
 function Camera:ctor(p, v, near, far, fov, aspect)
-  -- TODO: world to viewspace transform
-  -- a good explanation:  https://learnwebgl.brown37.net/08_projections/projections_perspective.html
   p = p or data.vec3(0, 0, 0)
   v = v or data.vec3(0, 0, -1)
   near = near or 0.25
@@ -13,6 +15,11 @@ function Camera:ctor(p, v, near, far, fov, aspect)
   fov = fov or 0.6
   aspect = aspect or 1
 
+  self:update(p, v, near, far, fov, aspect)
+end
+
+function Camera:update(p, v, near, far, fov, aspect)
+  -- a good explanation:  https://learnwebgl.brown37.net/08_projections/projections_perspective.html
   local h = near * fov
   local w = h / aspect
   local m00 = (2 * near) / w
@@ -30,14 +37,44 @@ function Camera:ctor(p, v, near, far, fov, aspect)
   self.near = near
   self.far = far
   self.fov = fov
-  self.aspect = aspect or 1
+  self.aspect = aspect
+
   -- stylua: ignore
-  self.matrixVP = data.mat4x4(
+  self.matrixP = data.mat4x4(
     m00, 0, m02, 0,
     0, m11, m12, 0,
     0, 0, m22, m23,
     0, 0, m32, 0)
+
+  self:lookat(v)
 end
+
+---@param v Vector view direction
+function Camera:lookat(v)
+  --use right handed coordinate system of camera space
+  local forward = (v * -1):normalize()
+  local up = data.vec3(0, 1, 0)
+  local right = up:cross(forward)
+  up = forward:cross(right)
+  self.dir = v
+
+  local pos = self.pos
+
+  -- stylua: ignore
+  local vmat = data.mat4x4(
+    right[1], up[1], forward[1], -pos[1],
+    right[2], up[2], forward[2], -pos[2],
+    right[3], up[3], forward[3], -pos[3],
+    0, 0, 0, 1
+  )
+
+  self.matrixV = vmat
+  self.matrixVP = self.matrixP:mul(vmat)
+end
+
+--move camera to a position
+---@param pos Vector
+function Camera:moveto(pos) end
 
 function Camera:ray(wbuf, hbuf, i, j)
   -- mapping pixels into [0,1]
