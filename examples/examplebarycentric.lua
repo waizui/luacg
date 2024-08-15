@@ -2,7 +2,6 @@ local writebuf = require("util.pngencoder")
 local data = require("structures.structure")
 local render = require("render.render")
 local vector = require("structures.vector")
-local quaternion = require("structures.quaternion")
 
 local function barycentric_coordinates(w, h)
   local p1 = vector.new(4, -1, -1, -4, 1)

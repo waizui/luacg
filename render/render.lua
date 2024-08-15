@@ -11,7 +11,8 @@ end
 
 ---@param primitive Primitive
 function Render.naiverasterize(w, h, primitive, buf, cb)
-  local matvp = Render.camera().matrixVP
+  local cam = Render.camera(data.vec3(0, 0, 0), data.vec3(0, 0, -1))
+  local matvp = cam.matrixVP
 
   for ip = 1, primitive.count do
     local p = primitive:get(ip)
@@ -19,8 +20,12 @@ function Render.naiverasterize(w, h, primitive, buf, cb)
     local p1, p2, p3 = p[1], p[2], p[3]
     local uv1, uv2, uv3 = p[4], p[5], p[6]
 
+    local vmat = cam.matrixV
+    local q1v, q2v, q3v = vmat:mul(p1), vmat:mul(p2), matvp:mul(p3)
     local q1, q2, q3 = matvp:mul(p1), matvp:mul(p2), matvp:mul(p3)
-    local w1, w2, w3 = q1[3], q2[3], q3[3]
+
+
+    local w1, w2, w3 = q1[4], q2[4], q3[4]
 
     -- perspective division
     q1 = q1 / w1
@@ -33,7 +38,7 @@ function Render.naiverasterize(w, h, primitive, buf, cb)
     -- from top left corner to right bottom rasterize
     for i = h, 1, -1 do
       for j = 1, w do
-        local ix = (2 * (j - 1) + 1) / w - 1
+        local ix = (2 * (j - 1) + 1) / w - 1 -- centroid of pixel
         local iy = (2 * (i - 1) + 1) / h - 1
         -- screen coordinates
         local s = data.vec2(ix, iy)
@@ -86,7 +91,7 @@ end
 ---@param bvh BVH
 function Render.raycastrasetrize(w, h, bvh, buf, cb)
   -- fov 0.9
-  local cam = Render.camera(nil,nil,nil,nil,0.9,nil)
+  local cam = Render.camera(nil, nil, nil, nil, 0.9, nil)
 
   -- from top left corner to right bottom rasterize
   for i = h, 1, -1 do

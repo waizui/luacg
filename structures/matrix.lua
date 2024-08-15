@@ -71,6 +71,7 @@ function Matrix.mul(m1, m2)
   return op.dot(m, m1, m2)
 end
 
+---@return Matrix
 function Matrix.copy(om)
   local m = Matrix.new(om.r, om.c)
   for r = 1, m.r do

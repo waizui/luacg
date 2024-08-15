@@ -66,6 +66,7 @@ function Vector.dot(a, b)
 end
 
 -- normalize a vector in itself
+---@return Vector
 function Vector.normalize(a)
   local acc = 0
   for i = 1, a.r do
