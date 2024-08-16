@@ -5,6 +5,14 @@ local data = require("structures.structure")
 ---@field matrixV Matrix view transform
 ---@field matrixVP Matrix world to projection transform
 ---@field dir Vector view direction, shoot out from camera
+---@field up Vector up direction
+---@field pos Vector position of camera
+---@field fov number field of view = h/near
+---@field near number near plane distance
+---@field far number far plane distance
+---@field aspect number equals h/w
+---@field nearh number height of near plane
+---@field nearw number width of near plane
 local Camera = require("language").newclass("Camera")
 
 function Camera:ctor(p, v, near, far, fov, aspect)
@@ -57,12 +65,13 @@ function Camera:lookat(v)
   local right = up:cross(forward)
   up = forward:cross(right)
   self.dir = v
+  self.up = up
 
   local pos = self.pos
   --[[
-  let Vw be vector in world space, Vv be view space, T be view transformation
+  let Vw be vector in world space, Vv be in view space, T be view transformation
   denoted by TVw = Vv,  because Vw = T^-1Vv, so T is the inverse of view to world transformation
-  orthgonal matrix inverse is transpose
+  orthogonal matrix's inverse is transpose
   ]]
   -- stylua: ignore
   local vmat = data.mat4x4(
@@ -83,15 +92,18 @@ end
 
 --move camera to a position
 ---@param pos Vector
-function Camera:moveto(pos) end
+---@param v Vector|nil view direction
+function Camera:moveto(pos, v)
+  self.pos = pos
+  self:lookat(v or self.dir)
+end
 
 function Camera:ray(wbuf, hbuf, i, j)
   -- mapping pixels into [0,1]
   local ix = ((i - 1) + 0.5) / wbuf
   local iy = ((j - 1) + 0.5) / hbuf
 
-  -- define up according to camera rotation
-  local up = data.vec3(0, 1, 0)
+  local up = self.up
   local right = self.dir:cross(up):normalize()
   local u, v = self.nearw / 2, self.nearh / 2
   local lcorner = (self.pos + self.dir * self.near) - (right * u + up * v)
