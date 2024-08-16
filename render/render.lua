@@ -20,11 +20,7 @@ function Render.naiverasterize(w, h, primitive, buf, cb)
     local p1, p2, p3 = p[1], p[2], p[3]
     local uv1, uv2, uv3 = p[4], p[5], p[6]
 
-    local vmat = cam.matrixV
-    local q1v, q2v, q3v = vmat:mul(p1), vmat:mul(p2), matvp:mul(p3)
     local q1, q2, q3 = matvp:mul(p1), matvp:mul(p2), matvp:mul(p3)
-
-
     local w1, w2, w3 = q1[4], q2[4], q3[4]
 
     -- perspective division
