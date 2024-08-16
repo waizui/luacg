@@ -23,11 +23,16 @@ function Quaternion.identity()
 end
 
 --rotate around x, y,z axes by degree x,y,z
----@param x number
----@param y number
----@param z number
+---@param x number|nil
+---@param y number|nil
+---@param z number|nil
 ---@return Quaternion
-function Quaternion.euler(x, y, z) end
+function Quaternion.euler(x, y, z)
+  local qx = (x and Quaternion.angle(x, vector.new(3, 1, 0, 0))) or Quaternion.identity()
+  local qy = (y and Quaternion.angle(y, vector.new(3, 0, 1, 0))) or Quaternion.identity()
+  local qz = (z and Quaternion.angle(z, vector.new(3, 0, 0, 1))) or Quaternion.identity()
+  return qz * (qy * qx)
+end
 
 ---@param degree number rotation in degree
 ---@param axis Vector rotation axis
@@ -41,9 +46,10 @@ end
 
 ---@param degree number
 ---@param axis Vector
+---@return Quaternion
 function Quaternion:rotate(degree, axis)
   local q = Quaternion.angle(degree, axis)
-  return self * q
+  return q * self
 end
 
 --3x3 matrix representation of formular: pr = q*p*q^-1
@@ -72,7 +78,7 @@ function Quaternion:rotatevec(p)
   return vector.new(3, res[1], res[2], res[3])
 end
 
--- composing two quaterions by order a,b
+-- composing two quaterions by order b , a
 ---@param a Quaternion
 ---@param b Quaternion
 ---@return Quaternion

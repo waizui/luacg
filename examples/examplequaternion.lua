@@ -9,7 +9,8 @@ local function homo(p)
 end
 
 local rotation = function(w, h)
-  local rotation = quaternion.angle(-45, vector.new(3, 1, 0, 0))
+  -- local rotation = quaternion.angle(45, data.vec3(0, 0, 1)):rotate(-45, data.vec3(1, 0, 0))
+  local rotation = quaternion.euler(nil, 45, 90)
   -- implementation of https://waizui.github.io/posts/a_glimpse_of_quaternion/a_glimpse_of_quaternion.html
   local p1 = homo(rotation:rotatevec(vector.new(3, -1, -1, 0)))
   local p2 = homo(rotation:rotatevec(vector.new(3, 1, -1, 0)))
