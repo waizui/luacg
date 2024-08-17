@@ -17,38 +17,36 @@ function Matrix:ctor(r, c, ...)
   end
 end
 
+local function getemptymat(a, b)
+  if type(a) == "number" then
+    return Matrix.new(b.r, b.c)
+  end
+  return Matrix.new(a.r, a.c)
+end
+
+-- scaling, not matrix multiplication, use matrix:mul for multiplication
+---@return Matrix
 function Matrix.__mul(a, b)
-  local v = Matrix.new(a.r)
+  local v = getemptymat(a, b)
   return op.scale(v, a, b)
 end
 
+---@return Matrix
 function Matrix.__div(a, b)
-  local v = Matrix.new(a.r)
-  return op.scale(v, a, 1 / b)
+  local v = getemptymat(a, b)
+  return op.div(v, a, b)
 end
 
----@return Vector
+---@return Matrix
 function Matrix.__add(a, b)
-  local v = Matrix.new(a.r)
+  local v = getemptymat(a, b)
   return op.add(v, a, b)
 end
 
+---@return Matrix
 function Matrix.__sub(a, b)
-  local v = Matrix.new(a.r)
+  local v = getemptymat(a, b)
   return op.sub(v, a, b)
-end
-
-function Matrix.set(m, r, c, v)
-  m[(r - 1) * m.c + c] = v
-end
-
-function Matrix.get(m, r, c)
-  return m[(r - 1) * m.c + c] or 0
-end
-
-function Matrix.scale(a, factor)
-  local m = Matrix.new(a.r, a.c)
-  return op.scale(m, a, factor)
 end
 
 function Matrix.getrow(m, r)
@@ -57,6 +55,14 @@ function Matrix.getrow(m, r)
     row[i] = m:get(r, i)
   end
   return row
+end
+
+function Matrix.set(m, r, c, v)
+  m[(r - 1) * m.c + c] = v
+end
+
+function Matrix.get(m, r, c)
+  return m[(r - 1) * m.c + c] or 0
 end
 
 function Matrix.setrow(m, r, ...)
@@ -96,7 +102,12 @@ function Matrix.transpose(om)
   return m
 end
 
+---@return Matrix
 function Matrix.inverse(om)
+  if om.r ~= om.c then
+    error("not an invesable matrix", -1)
+  end
+
   local m = Matrix.copy(om)
   -- argument matrix
   local am = Matrix.new(m.c, m.r)
@@ -222,6 +233,7 @@ function Matrix.swaprow(m, r1, r2)
   m:setrow(r2, tr1)
 end
 
+---@return Matrix
 function Matrix.identity(d)
   local m = Matrix.new(d, d)
   for i = 1, d do
@@ -231,6 +243,7 @@ function Matrix.identity(d)
   return m
 end
 
+---@return Matrix
 function Matrix.translate(d, ...)
   local m = Matrix.identity(d)
   for i, v in ipairs({ ... }) do

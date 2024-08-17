@@ -14,34 +14,31 @@ function Vector:ctor(r, ...)
   end
 end
 
-function Vector.isnumber(a)
-  return type(a) == "number"
+local function getempty(a, b)
+  if type(a) == "number" then
+    return Vector.new(b.r)
+  end
+
+  return Vector.new(a.r)
 end
 
----@return  Vector
 function Vector.__mul(a, b)
-  if not Vector.isnumber(b) then
-    a, b = b, a
-  end
-  local v = Vector.new(a.r)
+  local v = getempty(a, b)
   return op.scale(v, a, b)
 end
 
 function Vector.__div(a, b)
-  local v = Vector.new(a.r)
-  return op.scale(v, a, 1 / b)
+  local v = getempty(a, b)
+  return op.div(v, a, b)
 end
 
 function Vector.__add(a, b)
-  if not Vector.isnumber(b) then
-    a, b = b, a
-  end
-  local v = Vector.new(a.r)
+  local v = getempty(a, b)
   return op.add(v, a, b)
 end
 
 function Vector.__sub(a, b)
-  local v = Vector.new(a.r)
+  local v = getempty(a, b)
   return op.sub(v, a, b)
 end
 

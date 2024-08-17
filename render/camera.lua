@@ -60,7 +60,7 @@ end
 ---@param v Vector view direction
 function Camera:lookat(v)
   --use right handed coordinate system of camera space
-  local forward = (v * -1):normalize()
+  local forward = (-1 * v):normalize()
   local up = data.vec3(0, 1, 0)
   local right = up:cross(forward)
   up = forward:cross(right)
