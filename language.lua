@@ -29,25 +29,28 @@ local Object = {
 
 classes["Object"] = Object
 
-function Language.newclass(name, supername)
+---@param name string class name
+---@param super table|nil super Class
+function Language.newclass(name, super)
   local class = {}
-  return Language.regclass(class, name, supername)
+  return Language.regclass(class, name, super)
 end
 
-function Language.regclass(class, name, supername)
+---@param class table class to be registgered
+---@param name string class name
+---@param super table|nil super Class
+function Language.regclass(class, name, super)
   if classes[name] then
     error("class already exists :" .. name, 2)
     return
   end
 
+  super = super or Object
   classes[name] = class
   class._clsname = name
-  supername = supername or "Object"
-  class._base = supername
-
-  local super = classes[supername]
-  setmetatable(class, super)
+  class._base = super._clsname
   class.__index = findfield
+  setmetatable(class, super)
 
   class.new = function(...)
     local ins = {}
