@@ -48,8 +48,15 @@ function Vector.__eq(a, b)
       return false
     end
   end
-
   return true
+end
+
+function Vector.str(v)
+  local str = {}
+  for i = 1, v.r do
+    table.insert(str,v[i])
+  end
+  return table.concat(str,",")
 end
 
 function Vector.cross(a, b)

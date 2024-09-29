@@ -6,8 +6,9 @@ local repl = function()
   local str = {
     "please select what to render",
     " [1]: rasterisation and  barycentric coordinates",
-    " [2]: naive path tracing",
+    " [2]: naive ray casting",
     " [3]: rotation",
+    " [4]: bvh accelerated ray casting",
   }
   print(table.concat(str, "\n"))
 
@@ -17,9 +18,11 @@ local repl = function()
   if i == 1 then
     barycentric_coordinates(size, size)
   elseif i == 2 then
-    raycast(size, size)
+    raycast(size, size, true)
   elseif i == 3 then
     rotation(size, size)
+  elseif i == 4 then
+    raycast(size, size, false)
   else
     print("no such selection")
   end

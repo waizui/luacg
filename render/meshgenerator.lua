@@ -22,10 +22,13 @@ function MeshGenerator.box(pos)
     p1, p3, p4,
     p5, p6, p7,
     p5, p7, p8,
-    p4, p5, p7,
+
+    p4, p3, p7,
     p4, p7, p8,
+
     p2, p6, p7,
     p2, p7, p3,
+
     p1, p2, p6,
     p1, p6, p5,
     p5, p1, p8,
@@ -33,6 +36,26 @@ function MeshGenerator.box(pos)
   }
 
   return box
+end
+
+function MeshGenerator.uniformtriangle(count, center)
+  center = center or data.vec3(0, 0, 0)
+  local tris = {}
+  local z = center[3]
+  local rad = math.pi / 180
+  local p1 = data.vec3(center[1] + math.cos(210 * rad), center[2] + math.sin(210 * rad), z)
+  local p2 = data.vec3(center[1] + math.cos(-30 * rad), center[2] + math.sin(-30 * rad), z)
+  local p3 = data.vec3(center[1], center[2] + 1, z)
+
+  local dir = data.vec3(2, 0, 0)
+  for i = 1, count do
+    local diff = i * dir
+    table.insert(tris, p1 + diff)
+    table.insert(tris, p2 + diff)
+    table.insert(tris, p3 + diff)
+  end
+
+  return tris
 end
 
 function MeshGenerator.sphere(pos, r, level)

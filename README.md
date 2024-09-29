@@ -35,13 +35,18 @@ The execution results will be placed in the folder of this project.
 ![1](./pic/rasterize_preview.png)
 
 
-### 2. naive path tracing
+### 2. naive ray casting
 
 ![2](./pic/raycast_preview.png)
 
 ### 3. quaternion and rotation
 
 ![3](./pic/rotation_preview.png)
+
+
+### 4. bvh accelerated ray casting
+
+![4](./pic/raycast_bvh.png)
 
 ## References
 

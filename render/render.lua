@@ -1,5 +1,6 @@
 local data = require("structures.structure")
 local Camera = require("render.camera")
+local StopWatch = require("util.stopwatch")
 
 ---@class Render
 local Render = {}
@@ -84,17 +85,22 @@ function Render.moasic(u, v)
   return color
 end
 
+---@param cb function per-pixel function
 ---@param bvh BVH
-function Render.raycastrasetrize(w, h, bvh, buf, cb)
+function Render.naiveraycastrasterize(w, h, bvh, buf, cb)
   -- fov 0.9
   local cam = Render.camera(nil, nil, nil, nil, 0.9, nil)
+
+  ---@type StopWatch
+  local sw = StopWatch.new()
+  sw:start()
 
   -- from top left corner to right bottom rasterize
   for i = h, 1, -1 do
     for j = 1, w do
       local src, ray = cam.pos, cam:ray(w, h, j, i)
-
-      local hit = bvh:naiveraycast(src, ray)
+      local hit = nil
+      hit = bvh:naiveraycast(src, ray)
 
       if not hit then
         goto continue
@@ -105,6 +111,42 @@ function Render.raycastrasetrize(w, h, bvh, buf, cb)
       ::continue::
     end
   end
+  sw:stop()
+  print("naive ray casting finished in " .. sw:elapsed() .. "s")
+end
+
+---@param cb function per-pixel function
+---@param bvh BVH
+function Render.raycastrasetrize(w, h, bvh, buf, cb)
+  -- fov 0.9
+  local cam = Render.camera(nil, nil, nil, nil, 0.9, nil)
+  local camdir = data.vec3(-0.1, -0.5, -1) --magic numbers
+  cam:moveto(data.vec3(1, 3, 0.5) - camdir, camdir)
+  bvh:build()
+
+  ---@type StopWatch
+  local sw = StopWatch.new()
+  sw:start()
+
+  -- from top left corner to right bottom rasterize
+  for i = h, 1, -1 do
+    for j = 1, w do
+      local src, ray = cam.pos, cam:ray(w, h, j, i)
+      local hit = nil
+      hit = bvh:raycast(src, ray)
+
+      if not hit then
+        goto continue
+      end
+
+      local color = cb(hit)
+      buf[(h - i) * w + j] = color
+      ::continue::
+    end
+  end
+
+  sw:stop()
+  print("bvh accelerated ray casting finished in " .. sw:elapsed() .. "s")
 end
 
 return Render
