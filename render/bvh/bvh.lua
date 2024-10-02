@@ -49,11 +49,11 @@ end
 ---@param bvh BVH
 ---@param src Vector
 ---@param dir Vector
----@return Vector|nil
+---@return Vector|nil,number
 function BVH.raycast(bvh, src, dir)
-  local t = BVH._raycastbvh(bvh, src, dir, bvh.root)
+  local t, index = BVH._raycastbvh(bvh, src, dir, bvh.root)
   if t then
-    return src + dir * t
+    return src + dir * t, index
   end
 end
 
@@ -61,7 +61,7 @@ end
 ---@param src Vector
 ---@param dir Vector
 ---@param node BVHBuildNode
----@return number|nil
+---@return number|nil,number|nil
 function BVH._raycastbvh(bvh, src, dir, node)
   if not node then
     return
@@ -75,6 +75,7 @@ function BVH._raycastbvh(bvh, src, dir, node)
   if node:isleaf() and node.nprims > 0 then
     local depth = math.huge
     local hitt = nil
+    local hitindex = -1
     for i = 0, node.nprims - 1 do
       local index = i + node.primoffset
       local prim = bvh.primitives[index]
@@ -84,21 +85,27 @@ function BVH._raycastbvh(bvh, src, dir, node)
         if d < depth then
           depth = d
           hitt = t
+          hitindex = index
         end
       end
     end
 
-    return hitt
+    return hitt, hitindex
   end
 
-  local lhit = BVH._raycastbvh(bvh, src, dir, node.left)
-  local rhit = BVH._raycastbvh(bvh, src, dir, node.right)
+  local lhit, lhitindex = BVH._raycastbvh(bvh, src, dir, node.left)
+  local rhit, rhitindex = BVH._raycastbvh(bvh, src, dir, node.right)
 
   if lhit and rhit then
-    -- use closet hit point
-    return math.min(lhit, rhit)
+    if lhit > rhit then
+      return lhit, lhitindex
+    end
+    return rhit, rhitindex
   else
-    return lhit or rhit
+    if lhit then
+      return lhit, lhitindex
+    end
+    return rhit, rhitindex
   end
 end
 
@@ -205,15 +212,6 @@ local function printnode(node, b)
   print("---")
   local min, max = node.bounds.min, node.bounds.max
   print("node", min:str(), ",", max:str())
-  local cpos = node.bounds:centroid()
-  if node.primoffset then
-    local prim = b.primitives[node.primoffset]
-    local ppos = prim:bounds():centroid()
-    if cpos ~= ppos then
-      print(ppos[1], ppos[2], ppos[3])
-      error("centroid not equal", -1)
-    end
-  end
   print("---")
   print("\n")
 end

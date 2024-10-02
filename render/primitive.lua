@@ -79,4 +79,8 @@ function Primitive.centroid(p)
 	return p:bounds():centroid()
 end
 
+function Primitive.normal(p)
+  error()
+end
+
 return Primitive

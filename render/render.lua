@@ -1,6 +1,7 @@
 local data = require("structures.structure")
 local Camera = require("render.camera")
 local StopWatch = require("util.stopwatch")
+local Sampler = require("montecarlo.sampler")
 
 ---@class Render
 local Render = {}
@@ -147,6 +148,41 @@ function Render.raycastrasetrize(w, h, bvh, buf, cb)
 
   sw:stop()
   print("bvh accelerated ray casting finished in " .. sw:elapsed() .. "s")
+end
+
+---@param cb function per-pixel function
+---@param bvh BVH
+function Render.ambientocclusion(w, h, bvh, buf, cb)
+  -- fov 0.9
+  local cam = Render.camera(nil, nil, nil, nil, 0.9, nil)
+  local camdir = data.vec3(-0.1, -0.5, -1) --magic numbers
+  cam:moveto(data.vec3(1, 3, 0.5) - camdir, camdir)
+  bvh:build()
+
+  -- from top left corner to right bottom rasterize
+  for i = h, 1, -1 do
+    for j = 1, w do
+      local src, ray = cam.pos, cam:ray(w, h, j, i)
+      local hit, hitindex = bvh:raycast(src, ray)
+
+      if not hit then
+        goto continue
+      end
+
+      local prim = bvh.primitives[hitindex]
+
+      local color = Render.sampleambient(bvh, hit, prim:normal())
+      buf[(h - i) * w + j] = color
+      ::continue::
+    end
+  end
+end
+
+function Render.sampleambient(bvh, src, normal, count)
+  count = count or 4
+  for i = 1, count do
+
+  end
 end
 
 return Render
