@@ -20,8 +20,9 @@ function MeshGenerator.box(pos)
   local box = {
     p1, p2, p3,
     p1, p3, p4,
-    p5, p6, p7,
-    p5, p7, p8,
+
+    p6, p5, p8,
+    p6, p8, p7,
 
     p4, p3, p7,
     p4, p7, p8,
@@ -29,10 +30,11 @@ function MeshGenerator.box(pos)
     p2, p6, p7,
     p2, p7, p3,
 
-    p1, p2, p6,
-    p1, p6, p5,
-    p5, p1, p8,
-    p1, p4, p8,
+    p2, p1, p5,
+    p2, p5, p6,
+
+    p5, p1, p4,
+    p5, p4, p8,
   }
 
   return box
