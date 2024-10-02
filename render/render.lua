@@ -1,7 +1,9 @@
 local data = require("structures.structure")
 local Camera = require("render.camera")
 local StopWatch = require("util.stopwatch")
-local Sampler = require("montecarlo.sampler")
+local Sampler = require("render.montecarlo.sampler")
+local Matrix = require("structures.matrix")
+local Vector = require("structures.vector")
 
 ---@class Render
 local Render = {}
@@ -150,9 +152,8 @@ function Render.raycastrasetrize(w, h, bvh, buf, cb)
   print("bvh accelerated ray casting finished in " .. sw:elapsed() .. "s")
 end
 
----@param cb function per-pixel function
 ---@param bvh BVH
-function Render.ambientocclusion(w, h, bvh, buf, cb)
+function Render.ambientocclusion(w, h, bvh, buf)
   -- fov 0.9
   local cam = Render.camera(nil, nil, nil, nil, 0.9, nil)
   local camdir = data.vec3(-0.1, -0.5, -1) --magic numbers
@@ -172,17 +173,40 @@ function Render.ambientocclusion(w, h, bvh, buf, cb)
       local prim = bvh.primitives[hitindex]
 
       local color = Render.sampleambient(bvh, hit, prim:normal())
-      buf[(h - i) * w + j] = color
+      buf[(h - i) * w + j] = { color, color, color }
       ::continue::
     end
   end
 end
 
 function Render.sampleambient(bvh, src, normal, count)
-  count = count or 4
+  count = count or 2
+  local sum = 0
   for i = 1, count do
-
+    local dir, pdf = Sampler.hemiphere()
+    local worlddir = Render.tbn(normal):mul(dir)
+    local vecdir = data.vec3(worlddir[1], worlddir[2], worlddir[3])
+    local hit, hitindex = bvh:raycast(src + normal * 0.001, vecdir)
+    if hit then
+      sum = (sum + 1) / pdf
+    end
   end
+  sum = sum / count
+  return math.floor(sum * 255 + 0.5)
+end
+
+---@param normal Vector
+---@return Matrix
+function Render.tbn(normal)
+  local binormal = data.vec3(1, 0, 0):cross(normal)
+  local tangent = binormal:cross(normal)
+  ---@type Matrix
+  local m = Matrix.new(3, 3, {
+    tangent[1], binormal[1], normal[1],
+    tangent[2], binormal[2], normal[2],
+    tangent[3], binormal[3], normal[3],
+  })
+  return m
 end
 
 return Render
