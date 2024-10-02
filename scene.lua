@@ -9,8 +9,8 @@ local repl = function()
     " [1]: rasterisation and  barycentric coordinates",
     " [2]: naive ray casting",
     " [3]: rotation",
-    " [4]: bvh accelerated ray casting",
-    " [5]: monte carlo ambient occlusion",
+    " [4]: BVH acrelerated ray casting",
+    " [5]: Monte Carlo ambient occlusion",
   }
   print(table.concat(str, "\n"))
 

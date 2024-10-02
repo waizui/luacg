@@ -44,12 +44,12 @@ The execution results will be placed in the folder of this project.
 ![3](./pic/rotation_preview.png)
 
 
-### 4. bvh accelerated ray casting
+### 4. BVH accelerated ray casting
 
 ![4](./pic/raycast_bvh.png)
 
 
-### 5. monte carlo ambient occlusion
+### 5. Monte Carlo ambient occlusion
 
 ![5](./pic/ao.png)
 
