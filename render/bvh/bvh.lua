@@ -49,7 +49,7 @@ end
 ---@param bvh BVH
 ---@param src Vector
 ---@param dir Vector
----@return Vector|nil,number
+---@return Vector|nil,number|nil
 function BVH.raycast(bvh, src, dir)
   local t, index = BVH._raycastbvh(bvh, src, dir, bvh.root)
   if t then
@@ -75,7 +75,7 @@ function BVH._raycastbvh(bvh, src, dir, node)
   if node:isleaf() and node.nprims > 0 then
     local depth = math.huge
     local hitt = nil
-    local hitindex = -1
+    local hitindex = nil
     for i = 0, node.nprims - 1 do
       local index = i + node.primoffset
       local prim = bvh.primitives[index]
@@ -97,7 +97,7 @@ function BVH._raycastbvh(bvh, src, dir, node)
   local rhit, rhitindex = BVH._raycastbvh(bvh, src, dir, node.right)
 
   if lhit and rhit then
-    if lhit > rhit then
+    if lhit < rhit then
       return lhit, lhitindex
     end
     return rhit, rhitindex
