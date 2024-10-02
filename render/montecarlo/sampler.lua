@@ -18,7 +18,7 @@ function Sampler.hemiphere()
 
   local dir = Vector.new(3, x, y, z)
 
-  return dir, 0.5 * math.pi
+  return dir:normalize(), 0.5 * math.pi
 end
 
 return Sampler

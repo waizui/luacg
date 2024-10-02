@@ -48,6 +48,11 @@ The execution results will be placed in the folder of this project.
 
 ![4](./pic/raycast_bvh.png)
 
+
+### 5. monte carlo ambient occlusion
+
+![5](./pic/ao.png)
+
 ## References
 
 [Appied Computer Graphics by Prof. Nobuyuki Umetani](https://github.com/ACG-2024S/acg)

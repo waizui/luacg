@@ -40,6 +40,33 @@ function MeshGenerator.box(pos)
   return box
 end
 
+function MeshGenerator.showcase(pos,size)
+  size = size or 1
+  local p1 = data.vec3(pos[1] - size, pos[2] - size, pos[3] + size)
+  local p2 = data.vec3(pos[1] + size, pos[2] - size, pos[3] + size)
+  local p3 = data.vec3(pos[1] + size, pos[2] + size, pos[3] + size)
+  local p4 = data.vec3(pos[1] - size, pos[2] + size, pos[3] + size)
+
+  local p5 = data.vec3(pos[1] - size, pos[2] - size, pos[3] - size)
+  local p6 = data.vec3(pos[1] + size, pos[2] - size, pos[3] - size)
+  local p7 = data.vec3(pos[1] + size, pos[2] + size, pos[3] - size)
+  local p8 = data.vec3(pos[1] - size, pos[2] + size, pos[3] - size)
+
+  -- stylua: ignore
+  local box = {
+    p2, p5, p1,
+    p2, p6, p5,
+
+    p1, p5, p8,
+    p1, p8, p4,
+
+    p5, p6, p7,
+    p5, p7, p8,
+  }
+
+  return box
+end
+
 function MeshGenerator.uniformtriangle(count, center)
   center = center or data.vec3(0, 0, 0)
   local tris = {}

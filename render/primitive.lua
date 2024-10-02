@@ -87,7 +87,8 @@ end
 function Primitive:trianglenormal(p)
   local d = self:get(1)
   local p1, p2, p3 = d[1], d[2], d[3]
-  return (p2 - p1):cross(p3 - p1):normalize()
+  local n = (p2 - p1):cross(p3 - p1):normalize()
+  return n
 end
 
 return Primitive

@@ -1,6 +1,7 @@
 local barycentric_coordinates = require("examples.examplebarycentric")
 local raycast = require("examples.exampleraycast")
 local rotation = require("examples.examplequaternion")
+local ambient = require("examples.exampleambient")
 
 local repl = function()
   local str = {
@@ -9,6 +10,7 @@ local repl = function()
     " [2]: naive ray casting",
     " [3]: rotation",
     " [4]: bvh accelerated ray casting",
+    " [5]: monte carlo ambient occlusion",
   }
   print(table.concat(str, "\n"))
 
@@ -23,8 +25,10 @@ local repl = function()
     rotation(size, size)
   elseif i == 4 then
     raycast(size, size, false)
+  elseif i == 5 then
+    ambient()
   else
-    print("no such selection")
+    print("no such option")
   end
 end
 

@@ -158,6 +158,10 @@ function Render.ambientocclusion(w, h, bvh, buf)
   local cam = Render.camera(nil, nil, nil, nil, 0.9, nil)
   local camdir = data.vec3(-0.1, -0.5, -1) --magic numbers
   cam:moveto(data.vec3(1, 3, 0.5) - camdir, camdir)
+
+  -- local target = data.vec3(0, 0, 0)
+  -- local campos = data.vec3(1, 0, 0)
+  -- cam:moveto(campos, target - campos)
   bvh:build()
 
   -- from top left corner to right bottom rasterize
@@ -171,8 +175,9 @@ function Render.ambientocclusion(w, h, bvh, buf)
       end
 
       local prim = bvh.primitives[hitindex]
+      local normal = prim:normal()
 
-      local color = Render.sampleambient(bvh, hit, prim:normal())
+      local color = Render.sampleambient(bvh, hit, normal)
       buf[(h - i) * w + j] = { color, color, color }
       ::continue::
     end
@@ -180,25 +185,29 @@ function Render.ambientocclusion(w, h, bvh, buf)
 end
 
 function Render.sampleambient(bvh, src, normal, count)
-  count = count or 2
+  count = count or 10
   local sum = 0
   for i = 1, count do
     local dir, pdf = Sampler.hemiphere()
-    local worlddir = Render.tbn(normal):mul(dir)
-    local vecdir = data.vec3(worlddir[1], worlddir[2], worlddir[3])
-    local hit, hitindex = bvh:raycast(src + normal * 0.001, vecdir)
+    local worlddir = Render.o2w(normal):mul(dir)
+    local vecdir = data.vec3(worlddir[1], worlddir[2], worlddir[3]):normalize()
+    local hit, hitindex = bvh:raycast(src + normal * 0.01, vecdir)
     if hit then
-      sum = (sum + 1) / pdf
+      sum = sum + 1 / pdf
     end
   end
   sum = sum / count
-  return math.floor(sum * 255 + 0.5)
+  return math.floor((1 - sum) * 255 + 0.5)
 end
 
 ---@param normal Vector
 ---@return Matrix
-function Render.tbn(normal)
-  local binormal = data.vec3(1, 0, 0):cross(normal)
+function Render.o2w(normal)
+  local right = data.vec3(1, 0, 0)
+  if normal == right then
+    right = data.vec3(0, 1, 0)
+  end
+  local binormal = right:cross(normal)
   local tangent = binormal:cross(normal)
   ---@type Matrix
   local m = Matrix.new(3, 3, {

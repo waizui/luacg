@@ -12,6 +12,7 @@ function M.vec2(x, y)
   return vector.new(2, x, y)
 end
 
+---@return Vector
 function M.vec3(x, y, z)
   return vector.new(3, x, y, z)
 end
