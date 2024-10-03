@@ -42,7 +42,7 @@ local function ambient()
   local size = 128
   local b = getbvh()
   local buf = {}
-  Render.ambientocclusion(size, size, b, buf)
+  Render.ambientocclusion(size, size, b, buf, 10)
   writebuf(buf, size, size, "./ao.png")
 end
 

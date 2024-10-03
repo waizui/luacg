@@ -153,7 +153,7 @@ function Render.raycastrasetrize(w, h, bvh, buf, cb)
 end
 
 ---@param bvh BVH
-function Render.ambientocclusion(w, h, bvh, buf)
+function Render.ambientocclusion(w, h, bvh, buf, samplecount)
   -- fov 0.9
   local cam = Render.camera(nil, nil, nil, nil, 0.9, nil)
   local camdir = data.vec3(-0.1, -0.5, -1) --magic numbers
@@ -177,7 +177,7 @@ function Render.ambientocclusion(w, h, bvh, buf)
       local prim = bvh.primitives[hitindex]
       local normal = prim:normal()
 
-      local color = Render.sampleambient(bvh, hit, normal)
+      local color = Render.sampleambient(bvh, hit, normal, samplecount)
       buf[(h - i) * w + j] = { color, color, color }
       ::continue::
     end
@@ -188,16 +188,16 @@ function Render.sampleambient(bvh, src, normal, count)
   count = count or 10
   local sum = 0
   for i = 1, count do
-    local dir, pdf = Sampler.hemiphere()
+    local dir, pdf, costhta = Sampler.hemiphere()
     local worlddir = Render.o2w(normal):mul(dir)
     local vecdir = data.vec3(worlddir[1], worlddir[2], worlddir[3]):normalize()
     local hit, hitindex = bvh:raycast(src + normal * 0.01, vecdir)
-    if hit then
-      sum = sum + 1 / pdf
+    if not hit then
+      sum = sum + costhta / pdf
     end
   end
-  sum = sum / count
-  return math.floor((1 - sum) * 255 + 0.5)
+  sum = sum / (count * 2 * math.pi)
+  return math.floor(sum * 255 + 0.5)
 end
 
 ---@param normal Vector
