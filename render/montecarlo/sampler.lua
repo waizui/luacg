@@ -4,8 +4,8 @@ local Vector = require("structures.vector")
 local Sampler = require("language").newclass("Sampler")
 
 --uniformly sample a hemisphere
----@return Vector,number,number -- dir,pdf, costheta
-function Sampler.hemiphere()
+---@return Vector,number --dir,pdf
+function Sampler.hemisphere()
   local phi = 2 * math.pi * math.random()
   local rand = math.random()
 
@@ -20,8 +20,7 @@ function Sampler.hemiphere()
 
   local pdf = 0.5 / math.pi -- 1/(2pi)
 
-  -- costheta = cos(arccos(rand))
-  return dir:normalize(), pdf, rand
+  return dir:normalize(), pdf
 end
 
 return Sampler

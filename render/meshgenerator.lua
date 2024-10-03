@@ -62,6 +62,9 @@ function MeshGenerator.showcase(pos,size)
 
     p5, p6, p7,
     p5, p7, p8,
+
+    -- p2, p7, p6,
+    -- p2, p3, p7,
   }
 
   return box

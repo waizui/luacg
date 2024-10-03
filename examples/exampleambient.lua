@@ -32,8 +32,7 @@ local function getbvh()
 
   addshowcase(b, data.vec3(0, 1.5, -7), 4)
   addbox(b, data.vec3(-1.5, -1.5, -7))
-  addbox(b, data.vec3(2, -1.5, -7))
-  -- addshpere(b, data.vec3(2, -1.5, -7))
+  addshpere(b, data.vec3(2, -1.5, -7))
 
   return b
 end

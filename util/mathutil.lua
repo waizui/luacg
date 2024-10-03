@@ -12,4 +12,12 @@ function MathUtil.approximate(a, b)
   return math.abs(a - b) <= MathUtil.epsilon
 end
 
+function MathUtil.clamp(v, a, b)
+  return math.max(a, math.min(v, b))
+end
+
+function MathUtil.clamp01(v)
+  return MathUtil.clamp(v, 0, 1)
+end
+
 return MathUtil

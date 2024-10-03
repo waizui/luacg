@@ -54,9 +54,9 @@ end
 function Vector.str(v)
   local str = {}
   for i = 1, v.r do
-    table.insert(str,v[i])
+    table.insert(str, v[i])
   end
-  return table.concat(str,",")
+  return table.concat(str, ",")
 end
 
 function Vector.cross(a, b)
@@ -105,6 +105,18 @@ function Vector.min(a, b)
   end
 
   return v
+end
+
+function Vector.sqaremagnitude(v)
+  local sum = 0
+  for i = 1, v.r do
+    sum = sum + v[i] * v[i]
+  end
+  return sum
+end
+
+function Vector.magnitude(v)
+  return math.sqrt(v:sqaremagnitude())
 end
 
 ---@param iter function

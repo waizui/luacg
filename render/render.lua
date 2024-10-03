@@ -3,7 +3,7 @@ local Camera = require("render.camera")
 local StopWatch = require("util.stopwatch")
 local Sampler = require("render.montecarlo.sampler")
 local Matrix = require("structures.matrix")
-local Vector = require("structures.vector")
+local MathUtil = require("util.mathutil")
 
 ---@class Render
 local Render = {}
@@ -188,15 +188,16 @@ function Render.sampleambient(bvh, src, normal, count)
   count = count or 10
   local sum = 0
   for i = 1, count do
-    local dir, pdf, costhta = Sampler.hemiphere()
+    local dir, pdf = Sampler.hemisphere()
     local worlddir = Render.o2w(normal):mul(dir)
     local vecdir = data.vec3(worlddir[1], worlddir[2], worlddir[3]):normalize()
-    local hit, hitindex = bvh:raycast(src + normal * 0.01, vecdir)
+    local hit, hitindex = bvh:raycast(src + normal * 0.001, vecdir)
     if not hit then
-      sum = sum + costhta / pdf
+      sum = sum + dir[3] / pdf
     end
   end
-  sum = sum / (count * 2 * math.pi)
+  sum = sum / (count * math.pi)
+  sum = MathUtil.clamp01(sum)
   return math.floor(sum * 255 + 0.5)
 end
 
@@ -204,7 +205,8 @@ end
 ---@return Matrix
 function Render.o2w(normal)
   local right = data.vec3(1, 0, 0)
-  if normal == right then
+  local left = data.vec3(-1, 0, 0)
+  if normal == right or normal == left then
     right = data.vec3(0, 1, 0)
   end
   local binormal = right:cross(normal)
