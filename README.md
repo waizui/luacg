@@ -13,17 +13,21 @@ more algorithms will be added in the future.
 
 ## Usage
 
-To use luacg, you need to install lua interpreter in your computer.
+To use luacg, you need a lua interpreter.
 
-It can be downloaded [here](https://sourceforge.net/projects/luabinaries/files/5.3.6/Tools%20Executables/)
+It can be downloaded [here](https://github.com/waizui/luagl/tree/master/bins)
 
-To execute luacg, cd to the folder of this project.
-
-and execute following command. The "path_to_the_lua53" should be abosolute path to the interpreter you have
-downloaded, which is named lua53 (lua version 5.3).
+To execute luacg, cd to the root folder of this project and execute following command in your command-line interface. 
 
 ```bash
-path_to_the_lua53 ./scene.lua
+path_to_lua_interpreter ./scene.lua
+```
+The "path_to_lua_interpreter" should be abosolute path to the interpreter you have downloaded.
+
+For example, if you have downloaded lua interpreter in the root folder of this project, use:
+
+```bash
+./lua.exe ./scene.lua
 ```
 
 The execution results will be placed in the folder of this project.
@@ -52,6 +56,10 @@ The execution results will be placed in the folder of this project.
 ### 5. Monte Carlo ambient occlusion
 
 ![5](./pic/ao.png)
+
+### 6. OpenGL example
+
+![6](./pic/opengl_example.png)
 
 ## References
 

@@ -2,6 +2,7 @@ local barycentric_coordinates = require("examples.examplebarycentric")
 local raycast = require("examples.exampleraycast")
 local rotation = require("examples.examplequaternion")
 local ambient = require("examples.exampleambient")
+local openOpenGL = require("examples.exampleopengl")
 
 local repl = function()
   local str = {
@@ -11,6 +12,7 @@ local repl = function()
     " [3]: rotation",
     " [4]: BVH acrelerated ray casting",
     " [5]: Monte Carlo ambient occlusion",
+    " [6]: OpenGL example",
   }
   print(table.concat(str, "\n"))
 
@@ -27,6 +29,8 @@ local repl = function()
     raycast(size, size, false)
   elseif i == 5 then
     ambient()
+  elseif i == 6 then
+    openOpenGL()
   else
     print("no such option")
   end
