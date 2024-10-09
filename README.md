@@ -13,16 +13,18 @@ more algorithms will be added in the future.
 
 ## Usage
 
-To use luacg, you need a lua interpreter.
+To use luacg, you need a lua interpreter, official interpreter is not containing opengl features.
 
-It can be downloaded [here](https://github.com/waizui/luagl/tree/master/bins)
+Please download the interpreter build from (luagl)[https://github.com/waizui/luagl] project.
+
+It can be downloaded [here](https://github.com/waizui/luagl/releases).
 
 To execute luacg, cd to the root folder of this project and execute following command in your command-line interface. 
 
 ```bash
 path_to_lua_interpreter ./scene.lua
 ```
-The "path_to_lua_interpreter" should be abosolute path to the interpreter you have downloaded.
+The "path_to_lua_interpreter" should be path to the interpreter you have downloaded.
 
 For example, if you have downloaded lua interpreter in the root folder of this project, use:
 
@@ -30,7 +32,7 @@ For example, if you have downloaded lua interpreter in the root folder of this p
 ./lua.exe ./scene.lua
 ```
 
-The execution results will be placed in the folder of this project.
+The execution results will be placed in the root folder of this project.
 
 ## List
 
