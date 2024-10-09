@@ -13,7 +13,7 @@ more algorithms will be added in the future.
 
 ## Usage
 
-To use luacg, you need a lua interpreter, official interpreter does not containing opengl features.
+To use luacg, you need a lua interpreter, the official interpreter does not include opengl features.
 
 Please download the interpreter built from [luagl](https://github.com/waizui/luagl) project. It can be downloaded [here](https://github.com/waizui/luagl/releases).
 
