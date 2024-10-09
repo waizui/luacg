@@ -15,9 +15,7 @@ more algorithms will be added in the future.
 
 To use luacg, you need a lua interpreter, official interpreter is not containing opengl features.
 
-Please download the interpreter build from [luagl](https://github.com/waizui/luagl) project.
-
-It can be downloaded [here](https://github.com/waizui/luagl/releases).
+Please download the interpreter build from [luagl](https://github.com/waizui/luagl) project. It can be downloaded [here](https://github.com/waizui/luagl/releases).
 
 To execute luacg, cd to the root folder of this project and execute following command in your command-line interface. 
 
