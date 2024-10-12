@@ -81,6 +81,7 @@ vec3 SDF_color(vec3 pos)
   return vec3(0,1,0);
 }
 
+out vec4 fragColor;
 
 void main()
 {
@@ -103,7 +104,7 @@ void main()
   for(int itr=0;itr<60;++itr){
     float s0 = SDF(pos_cur);
     if( s0 < 0.0 ){ // ray starting from inside the object
-      gl_FragColor = vec4(1, 0, 0, 1); // paint red
+      fragColor = vec4(1, 0, 0, 1); // paint red
       return;
     }
     if( s0 < 1.0e-3 ){ // the ray hit the implicit surfacee
@@ -114,10 +115,10 @@ void main()
       vec3 nrm = normalize(vec3(sx,sy,sz)); // normal direction
       float coeff = -dot(nrm, dir); // Lambersian reflection. The light is at the camera position.
       vec3 color = SDF_color(pos_cur);
-      gl_FragColor = vec4(coeff*color, 1);
+      fragColor = vec4(coeff*color, 1);
       return;
     }
     pos_cur += s0 * dir; // advance ray
   }
-  gl_FragColor = vec4(0.9, 0.9, 1.0, 1); // ray doesn't hit the object
+  fragColor = vec4(0.9, 0.9, 1.0, 1); // ray doesn't hit the object
 }
