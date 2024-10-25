@@ -61,6 +61,12 @@ The execution results will be placed in the root folder of this project.
 
 ![6](./pic/opengl_example.png)
 
+## MISC
+
+[luacg Gaussian Splatting](https://github.com/waizui/luacg_guassian)
+
+![3DGS](./pic/splatting.png)
+
 ## References
 
 [Appied Computer Graphics by Prof. Nobuyuki Umetani](https://github.com/ACG-2024S/acg)
